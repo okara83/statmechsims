@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<!-- _author__      = "Onur Kara"
+__copyright__   = "Copyright 2017, College Park, MD"
+###Wolff Clustering Algorithm### 
+-->
+<html lang="en">
+<head>
+<style align="right">
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    -webkit-animation-name: fadeIn; /* Fade in the background */
+    -webkit-animation-duration: 0.4s;
+    animation-name: fadeIn;
+    animation-duration: 0.4s
+}
+
+/* Modal Content */
+.modal-content {
+    position: fixed;
+    bottom: 0;
+    background-color: #fefefe;
+    width: 100%;
+    -webkit-animation-name: slideIn;
+    -webkit-animation-duration: 0.4s;
+    animation-name: slideIn;
+    animation-duration: 0.4s
+}
+
+/* The Close Button */
+.close {
+    color: white;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-header {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+}
+
+.modal-body {padding: 2px 16px;}
+
+.modal-footer {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+}
+
+/* Add Animation */
+@-webkit-keyframes slideIn {
+    from {bottom: -300px; opacity: 0} 
+    to {bottom: 0; opacity: 1}
+}
+
+@keyframes slideIn {
+    from {bottom: -300px; opacity: 0}
+    to {bottom: 0; opacity: 1}
+}
+
+@-webkit-keyframes fadeIn {
+    from {opacity: 0} 
+    to {opacity: 1}
+}
+
+@keyframes fadeIn {
+    from {opacity: 0} 
+    to {opacity: 1}
+}
+</style>
+<script type=”text/javascript”
+src=”https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js/MathJax.js?config=TeX-AMS-MML_HTMLorMML“></script>
+</head>
+<body>
+
+<!-- Trigger/Open The Modal -->
+<button id="myBtn">Introduction and Program Summary</button>
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="close">&times;</span>
+      <h2>Wolff Algorithm and Single Cluster Spin Flips - </h2>
+    </div>
+    <div class="modal-body">
+      <p>This application simulates the Spin-1/2 Wolff clustering algorithm on the square lattice (dimension=2). The programs requires Javascript is enabled and
+      that your browser is fairly updated. </p>
+      <p>The idea of the algorithm will be to first built a cluster of sites according to certain rules, and then to flip the whole cluster. The cluster will
+be built by the “activation” of some of the links between two neighboring sites, and requires that we classify the links according to whether it connects two sites where
+the field has the same orientation, or opposite orientations </p>
+    </div>
+    <div class="modal-footer">
+      <h3>The Hamiltonian and the cluster membership acceptance probabilities for the Wolff algorithm are:</h3>
+      <img src="http://latex.codecogs.com/png.latex?\inline \mathcal{H} =  -J\sum\limits_{\left<i,j\right>} s_i s_j -B\sum\limits_{i} s_i  \text{ with } P_{\text{wol}} = 1-e^{-2\beta J} \text{the probability a neighbor with like spin is accepted into the cluster}}"   " alt="\inline fill latex in" />
+    </div>
+  </div>
+  </div>
+<title>Wolff Single Cluster Flip</title>
+<meta charset="UTF-8">
+</head>
+<body>
+
+  <h1 align="center" >Wolff Single Cluster Flip</h1>          
+     <h3 align="center">	<div>
+ Size: <select id="sizeSelect" onchange = "resize()">
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                    <option>8</option>
+                    <option>10</option>
+                    <option>25</option>
+                    <option>40</option>
+                    <option>50</option>
+                    <option>75</option>
+                    <option>100</option>
+                    <option>200</option>
+                    <option>300</option>
+                    <option>600</option>
+                </select> 
+
+</h3></div>
+    <h3 align="center"><div>
+ <button id="myButton" class="float-center submit-button" >Blume-Capel Model</button>
+<script type="text/javascript">
+    document.getElementById("myButton").onclick = function () {
+        location.href = "BEG.html";
+    };
+</script>
+<button id="IsingHome" class="float-left submit-button" >Ising Home</button>
+<script type="text/javascript">
+    document.getElementById("IsingHome").onclick = function () {
+        location.href = "IsingModelIndex.html";
+    };
+</script></div></h3>
+  
+  	
+
+
+ 
+<h3 align="left"> 
+<div> <div style="width:300px;  height:0px; margin:0 auto;">               
+<p><b> Data </b></p>
+            <div><input type ="button" value ="Reset Stats" onclick ="resetData()"/></div>
+            <div class = "verticalSpace"><table border="1" width="3" cellpadding="4">
+             
+                   <tbody>
+                       <tr>
+                           <td>Steps</td>
+                           <td id = "Steps">0</td>
+                       </tr>
+                       <tr>
+                           <td>Energy</td>
+                           <td id = "Energy">0</td>
+                       </tr>
+                       <tr>
+                           <td>Average Energy</td>
+                           <td id = "Eav">0</td>
+                       </tr>
+                       <tr>
+                           <td>Sigma Energy</td>
+                           <td id = "SigmaE">0</td>
+                       </tr>
+                       <tr>
+                           <td>Magnetization</td>
+                           <td id = "M">0</td>
+                       </tr>
+                       <tr>
+                           <td>Average Magnetization</td>
+                           <td id = "Mav">0</td>
+                       </tr>
+                       <tr>
+                           <td>Sigma Magnetization</td>
+                           <td id = "SigmaM">0</td>
+                       </tr>
+                   </tbody>
+               </table>
+ <h3 align="center">
+    <canvas id="graph" style="background-color:#ffffff;"></canvas>
+     <button id="clear" type="button">clear</button> 
+            </div>                  
+</div> <canvas id="wolff" style="background-color:#ffffff;"></canvas></div>
+      
+      <div>
+    
+       </div>
+
+    
+    <div>
+    <h4>
+     <button id="start" type="button">Start</button>
+     <button id="stop"  type="button" >Stop</button>
+    <input style="width:20%;" type="text" id="temperature">
+  
+    
+    <button id="auto" type="button">Incremental Decrease</button>
+    <button id="autoUp" type="button" >Incremental Increase</button>
+    <p>Temperature: <span id="temperature_value"> </span> </p></h4>
+</div> 
+</h3></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.1/bootstrap-slider.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.1/css/bootstrap-slider.min.css">
+
+
+<script>
+      
+function Wolff() {
+
+	var sizeSelect = document.getElementById("sizeSelect");
+	sizeSelect.selectedIndex = 9;//default is 100
+    var Size = Number(sizeSelect.options[sizeSelect.selectedIndex].text);  // dimensions of lattice
+    var sizeSquared = Size*Size;
+    var T = 2.27
+    var algorithm = 0;
+
+    var running = false;
+    var timerID;
+    var basetime = 0;
+    var interval = 1; // msec
+
+    var wid=5;
+    var canvas = document.getElementById('wolff');
+    var context = canvas.getContext('2d');
+    canvas.width = canvas.height = Size*wid;
+
+    var spin = new Array(sizeSquared);
+    var spinBefore = new Array(sizeSquared);
+    for(var i=0;i<sizeSquared;++i) {
+        spin[i] = (Math.random()<0.5) ? 1 : -1;
+        spinBefore[i] = 0;
+    }
+
+    var clusteredChildren = new Array(sizeSquared);
+
+    function draw() {
+        context.fillStyle = '#ffff00';
+        for(var i=0;i<Size;++i) {
+            for(var j=0;j<Size;++j) {
+                var idx = i*Size+j;
+                if(spin[idx]==1 && spinBefore[idx]!=1)
+                    context.fillRect(j*wid,i*wid,wid,wid);
+            }
+        }
+        context.fillStyle = '#0000ff';
+        for(var i=0;i<Size;++i) {
+            for(var j=0;j<Size;++j) {
+                var idx = i*Size+j;
+                if(spin[idx]==-1 && spinBefore[idx]!=-1)
+                    context.fillRect(j*wid,i*wid,wid,wid);
+            }
+        }
+        for(var i=0;i<sizeSquared;++i) spinBefore[i] = spin[i];
+    }
+
+    function updateSpin() {
+        if(algorithm==0) wolff();
+        else UpdateNow();
+    }
+
+    
+
+    
+
+    function wolff() {
+        interval = 100;
+        var prob = 1.0-Math.exp(-2.0/T);
+        var InnerLoopCount = 0;
+
+        makeCluster(prob);
+        while(InnerLoopCount<sizeSquared/wid) {
+            var updateCluster = clusteredChildren[randomInt(0,sizeSquared)];
+            for(var i=0;i<sizeSquared;++i) {
+                if(clusteredChildren[i] == updateCluster) {
+                    spin[i] = -spin[i];
+                    InnerLoopCount++;
+                }
+            }
+        }
+    }
+
+    function parentOf(child) {
+        var parent = clusteredChildren[child];
+        while(child != parent) {
+            child = parent;
+            parent = clusteredChildren[child];
+        }
+        return child;
+    }
+
+    function connect(i,j) {
+        var ri = parentOf(i);
+        var rj = parentOf(j);
+        var root = (ri<rj) ? ri : rj;
+        var child = i;
+        while(child != root) {
+            var parent = clusteredChildren[child];
+            clusteredChildren[child] = root;
+            child = parent;
+        }
+        var child = j;
+        while(child != root) {
+            var parent = clusteredChildren[child];
+            clusteredChildren[child] = root;
+            child = parent;
+        }
+    }
+
+    function makeCluster(prob) {
+        for(var i=0;i<sizeSquared;++i) clusteredChildren[i]=i;
+        for(var i=0;i<sizeSquared;++i) { // horizontal bonds
+            var j = (i+1)%sizeSquared;
+            if(spin[i]==spin[j] && Math.random()<prob) connect(i,j);
+        }
+        for(var i=0;i<sizeSquared;++i) { // vartical bonds
+            var j = (i+Size)%sizeSquared;
+            if(spin[i]==spin[j] && Math.random()<prob) connect(i,j);
+        }
+        for(var i=0;i<sizeSquared;++i) {
+            clusteredChildren[i] = parentOf(i);
+        }
+    }
+
+    function randomInt(min,max) {
+        return Math.floor(Math.random() * (max-min))+min;
+    }
+
+
+
+    function Magsys() {
+        var mag = 0.0;
+        for(var i=0;i<sizeSquared;++i) {
+            mag += spin[i];
+        }
+        return mag/sizeSquared;
+    }
+
+    function UpdateNow() {
+        interval = 100;
+        for(var i=0;i<sizeSquared;++i) {
+            if(Math.random()<0.5) spin[i] = 1;
+            else spin[i] = -1;
+        }
+    }
+
+
+
+    function update() {
+        updateSpin();
+        draw();
+        graph.addPoint(T,Magsys(),algorithm);
+    }
+
+    function loop() {
+        var now = Date.now();
+        if(now-basetime>interval) {
+            basetime = now;
+            update();
+        }
+        timerID = requestAnimationFrame(loop);
+    }
+
+    return {
+        start: function() {
+            if(!running) loop();
+            running = true;
+        },
+        stop: function() {
+            cancelAnimationFrame(timerID);
+            running = false;
+        },
+        step: function() {
+            cancelAnimationFrame(timerID);
+            running = false;
+            update();
+        },
+        setTemp: function(temp) {T=temp;},
+        setTempTc: function(){T=2.27;},
+        getTemp: function() {return T;},
+        setAlgorithm: function(alg) {algorithm=alg;},
+        getAlgorithm: function() {return algorithm;},
+    }
+}
+
+function Graph() {    /* begin graphing function  */
+    var canvas = document.getElementById("graph");
+    var context = canvas.getContext("2d");
+    var offset = 8;
+    var widt = 11;
+    var t_min = 0.05;
+    var t_del = 0.1;
+
+    var width = canvas.width = 510;
+    var height = canvas.height = widt*10+offset*2;
+
+    reset();
+
+    function x(temp) {return widt*(temp-t_min)/t_del+offset;}
+    function y(mag) {return widt*(1.0-mag)/0.2+offset;}
+    function temp(x) {
+        var temp = t_del*(x-offset)/widt+t_min;
+        temp = Math.round(temp*100)/100;
+        if(temp<0.05) temp=0.05;
+        if(temp>5.0) temp=5.0;
+        return temp;
+    }
+
+    function addPoint(temp,mag,alg) {
+        if(alg==0) context.fillStyle = "rgba(151,4,4,0.5)";
+        context.beginPath();
+        context.arc( x(temp), y(mag), 2,0,2*Math.PI,true);
+        context.fill();
+    }
+
+    function reset() {
+        context.fillStyle = "#ffffff";
+        context.fillRect(0,0,width-6,height-6)
+        context.lineWidth = 1;
+        context.strokeStyle = "#000000";
+        for(var i=0;i<60;i+=5)  {
+            context.beginPath();
+            context.moveTo(offset+i*widt, 6);
+            context.lineTo(offset+i*widt, height-6);
+            context.stroke();
+        }
+        for(var i=0;i<11;i+=5) {
+            context.beginPath();
+            context.moveTo(6, offset+i*widt);
+            context.lineTo(width-6, offset+i*widt);
+            context.stroke();
+        }
+
+        context.strokeStyle = "#000000";
+        context.beginPath();
+        context.moveTo(0, height/2);
+        context.lineTo(width, height/2);
+        context.stroke();
+    }
+
+    return {
+        addPoint: addPoint,
+        reset: reset,
+        getT: temp
+    }
+} /* end graphing function  */
+
+var wolff = Wolff();
+var graph = Graph();
+
+$(function () {
+    var initT = 2.27, timerID;
+
+    function setT(temp) {
+        var temp = Math.round(temp*100)/100;
+        $( "#temperature_value" ).text( temp );
+        wolff.setTemp(temp);
+        $("#temperature").slider("setValue", temp);
+    }
+
+
+
+
+
+    function cool() {
+        var temp = wolff.getTemp();
+        var dt = 0.1, interval = 1000;
+        if(temp>=2.0 && temp<=2.5) {
+            dt = 0.02; interval = 700;
+        } 
+        else if(temp<2.0) {
+            dt = 0.1; interval = 200;
+		}
+		else {
+            dt = 0.1; interval = 100;
+        } 
+        temp = Math.round( (temp-dt)*100 )/100;
+        if (temp<0.05) {
+            temp = 5.0;   
+        }
+
+        setT(temp);
+        timerID = setTimeout(cool, interval);
+        wolff.start();
+    }
+    
+    function heat() {
+        var temp = wolff.getTemp();
+        var dt = 0.1, interval = 1000;
+        if(temp>=2.0 && temp<=2.50) {
+            dt = 0.02; interval = 750;
+        } 
+        else if(temp>2.50) {
+            dt = 0.05; interval = 100;
+		}
+		else {
+            dt = 0.05; interval = 100;
+        } 
+        temp = Math.round( (temp+dt)*100 )/100;
+        if (temp>5.0) {
+            temp = 0.01;
+        }
+
+        setT(temp);
+        timerID = setTimeout(heat, interval);
+        wolff.start();
+    }
+    
+    function stopCool() {
+        clearTimeout(timerID);
+        if ($("#auto").hasClass("active")) {
+            $("#auto").button("toggle");
+        }
+    }
+    
+    function stopHeat() {
+        clearTimeout(timerID);
+        if ($("#autoUp").hasClass("active")) {
+            $("#autoUp").button("toggle");
+        }
+    }
+
+
+    var t_slider = $("#temperature").slider({
+        min: 0.05,
+        max: 5.1,
+        step: 0.01,
+        value: initT
+       
+        
+    });
+    
+    t_slider.on("slide", function(e) {
+        setT( e.value );
+        //document.getElementById('#temperature').value=' ' ; 
+    });
+    t_slider.prev().on("mouseup",function() {
+        setT( t_slider.slider("getValue") );
+    });
+
+    $("#start").on("click", wolff.start);
+    $("#stop" ).on("click", function() {
+        stopCool();
+        wolff.stop();
+    });
+    $("#step").on("click", function() {
+        stopCool();
+        wolff.step();
+    });
+
+    $("#algorithm").on("change", function() {
+        wolff.setAlgorithm( $(this).val() );
+    });
+
+   
+
+    $("#clear").on("click", graph.reset);
+
+    $("#auto").on("click", function(e) {
+        $(this).button("toggle");
+        if($(this).hasClass("active")) {
+            cool();
+        } else {
+            stopCool();
+        }
+    });
+    
+     $("#autoUp").on("click", function(e) {
+        $(this).button("toggle");
+        if($(this).hasClass("active")) {
+            heat();
+        } else {
+            stopHeat();
+        }
+    });
+
+    setT(initT);
+    wolff.start();
+});
+
+</script>
+<script>
+// Get the modal
+var modal = document.getElementById('myModal');
+
+// Get the button that opens the modal
+var btn = document.getElementById("myBtn");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the modal 
+btn.onclick = function() {
+    modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+    modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+</script>
+</body>
+
+</html>

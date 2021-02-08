@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<style align="right">
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    -webkit-animation-name: fadeIn; /* Fade in the background */
+    -webkit-animation-duration: 0.4s;
+    animation-name: fadeIn;
+    animation-duration: 0.4s
+}
+
+/* Modal Content */
+.modal-content {
+    position: fixed;
+    bottom: 0;
+    background-color: #fefefe;
+    width: 100%;
+    -webkit-animation-name: slideIn;
+    -webkit-animation-duration: 0.4s;
+    animation-name: slideIn;
+    animation-duration: 0.4s
+}
+
+/* The Close Button */
+.close {
+    color: white;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-header {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+}
+
+.modal-body {padding: 2px 16px;}
+
+.modal-footer {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+}
+
+/* Add Animation */
+@-webkit-keyframes slideIn {
+    from {bottom: -300px; opacity: 0} 
+    to {bottom: 0; opacity: 1}
+}
+
+@keyframes slideIn {
+    from {bottom: -300px; opacity: 0}
+    to {bottom: 0; opacity: 1}
+}
+
+@-webkit-keyframes fadeIn {
+    from {opacity: 0} 
+    to {opacity: 1}
+}
+
+@keyframes fadeIn {
+    from {opacity: 0} 
+    to {opacity: 1}
+}
+</style>
+<script type=”text/javascript”
+src=”https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js/MathJax.js?config=TeX-AMS-MML_HTMLorMML“></script>
+</head>
+<body>
+
+
+
+
+<h2> </h2>
+
+<!-- Trigger/Open The Modal -->
+<button id="myBtn">Introduction and Program Summary</button>
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="close">&times;</span>
+      <h2>The Heat Bath Algorithm </h2>
+    </div>
+    <div class="modal-body">
+      <p>This application simulates theHeat Bath algorithm on the square lattice (dimension=2). The programs requires Javascript is enabled and
+      that your browser is fairly updated. </p>
+      <p>Heat Bath Algorithm </p>
+    </div>
+    <div class="modal-footer">
+      <h3>The Hamiltonian and the cluster membership acceptance probabilities for the Wolff algorithm are:</h3>
+      <img src="http://latex.codecogs.com/png.latex?\inline \mathcal{H} =  -J\sum\limits_{\left<i,j\right>} s_i s_j -B\sum\limits_{i} s_i  \text{ with } P_{\text{wol}} = 1-e^{-2\beta J} \text{the probability a neighbor with like spin is accepted into the cluster}}"   " alt="\inline SOME LATEX" />
+    </div>
+  </div>
+  </div>
+<title>Heat Bath Algorithm</title>
+<meta charset="UTF-8">
+</head>
+<body>
+
+  <h1 align="center" >Heat Bath Algorithm</h1>
+</div>
+ 
+    <div>
+     <h2 align="center" >
+     <select class="algorithmSelect" name="algorithm" id="algorithm">
+     <option value="0"> Heat Bath
+    </select>
+      Size: <select id="sizeSelect" onchange = "resize()">
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                    <option>8</option>
+                    <option>10</option>
+                    <option>25</option>
+                    <option>40</option>
+                    <option>50</option>
+                    <option>75</option>
+                    <option>100</option>
+                    <option>200</option>
+                    <option>300</option>
+                    <option>600</option>
+                </select> 
+                </h2>
+                </div>
+                
+  	<div>
+    <h3 align="center">
+    <div>
+    <canvas id="hbath" width=400 height=400 style="background-color:#ffffff;"></canvas></h3></div>
+ 
+ <div>
+     <h3 align="center">
+    <canvas id="graph" width=600px style="background-color:#ffffff;"></canvas>
+     <button id="clear" type="button">clear</button> 
+       </h3>
+       </div>
+  
+    
+    <div>
+    <h7>
+     <button id="start" type="button">Start</button>
+     <button id="stop"  type="button" >Stop</button>
+    <input style="width:20%;" type="text" id="temperature">
+  
+    
+    <button id="auto" type="button">Incremental Decrease</button>
+    <button id="autoUp" type="button" >Incremental Increase</button>
+    <p>Temperature: <span id="temperature_value"> </span> </p>
+</div> 
+            &nbsp; &nbsp;
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.1/bootstrap-slider.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.1/css/bootstrap-slider.min.css">
+
+
+<script>
+
+
+
+function HBath() {
+  	var sizeSelect = document.getElementById("sizeSelect");
+	sizeSelect.selectedIndex = 9;//default is 100
+    var Size = Number(sizeSelect.options[sizeSelect.selectedIndex].text);  // dimensions of lattice
+    var sizeSquared = Size*Size;
+    var T = 2.27
+    var algorithm = 0;
+
+    var running = false;
+    var timerID;
+    var basetime = 0;
+    var interval = 200; 
+
+    var w=5;
+    var canvas = document.getElementById('hbath');
+    var context = canvas.getContext('2d');
+    canvas.width = canvas.height = Size*w;
+
+    var spin = new Array(sizeSquared);
+    var spinBefore = new Array(sizeSquared);
+    for(var i=0;i<sizeSquared;++i) {
+        spin[i] = (Math.random()<0.5) ? 1 : -1;
+        spinBefore[i] = 0;
+    }
+
+	var cluster = new Array(sizeSquared);
+
+    function draw() {
+        context.fillStyle = '#ffff00';
+        for(var i=0;i<Size;++i) {
+            for(var j=0;j<Size;++j) {
+                var idx = i*Size+j;
+                if(spin[idx]==1 && spinBefore[idx]!=1)
+                    context.fillRect(j*w,i*w,w,w);
+            }
+        }
+        context.fillStyle = '#0000ff';
+        for(var i=0;i<Size;++i) {
+            for(var j=0;j<Size;++j) {
+                var idx = i*Size+j;
+                if(spin[idx]==-1 && spinBefore[idx]!=-1)
+                    context.fillRect(j*w,i*w,w,w);
+            }
+        }
+        for(var i=0;i<sizeSquared;++i) spinBefore[i] = spin[i];
+    }
+
+
+    function updateSpin() {
+        if(algorithm==0) heatBath();
+        else randomUpdate();
+    }
+
+
+
+
+    function heatBath() {
+        interval = 40;
+        for(var k=0;k<sizeSquared;++k) {
+            var i = randomInt(0,sizeSquared);
+            var s0 = spin[i];
+            var s1 = spin[(i+1)%sizeSquared];
+            var s2 = spin[(i-1+sizeSquared)%sizeSquared];
+            var s3 = spin[(i+Size)%sizeSquared];
+            var s4 = spin[(i-Size+sizeSquared)%sizeSquared];
+            var prob = 1.0/(1.0+Math.exp(2.0*s0*(s1+s2+s3+s4)/T))
+            if(Math.random()<prob) spin[i] = -s0;
+            
+        }
+    }
+
+    
+    function randomInt(min,max) {
+        return Math.floor(Math.random() * (max-min))+min;
+    }
+
+    function magnetization() {
+        var m = 0.0;
+        for(var i=0;i<sizeSquared;++i) {
+            m += spin[i];
+        }
+        if(true){
+            console.log("magnetization: ", m/sizeSquared, "Temp : ", T );
+            }
+        return m/sizeSquared;
+    }
+
+    function randomUpdate() {
+        interval = 200;
+        for(var i=0;i<sizeSquared;++i) {
+            if(Math.random()<0.5) spin[i] = 1;
+            else spin[i] = -1;
+         
+        }
+    }
+
+    function update() {
+        updateSpin();
+        draw();
+         //graph.addPoint(T,magnetization(),algorithm);
+    }
+
+    function loop() {
+        var now = Date.now();
+        if(now-basetime>interval) {
+            basetime = now;
+            update();
+        }
+        timerID = requestAnimationFrame(loop);
+    }
+
+    return {
+        start: function() {
+            if(!running) loop();
+            graph.addPoint(T,magnetization(),algorithm);
+            running = true;
+        },
+        stop: function() {
+            cancelAnimationFrame(timerID);
+           // graph.addPoint(T,magnetization(),algorithm);
+            running = false;
+        },
+        step: function() {
+            cancelAnimationFrame(timerID);
+            //graph.addPoint(T,magnetization(),algorithm);
+            running = false;
+            update();
+        },
+        setTemp: function(t) {T=t;},
+        setTempTc: function() {T=T;},
+        getTemp: function() {return T;},
+        setAlgorithm: function(a) {algorithm=a;},
+        getAlgorithm: function() {return algorithm;},
+        
+    }
+}
+
+function Graph() {
+    var canvas = document.getElementById("graph");
+    var context = canvas.getContext("2d");
+    var offset = 7.5;
+    var w = 11;
+    var t_min = 0.001;
+    var t_del = 0.1;
+
+    var width = canvas.width = 450;
+    var height = canvas.height = w*10+offset*2;
+
+    reset();
+
+    function x(t) {return w*(t-t_min)/t_del+offset;}
+    function y(m) {return w*(1.0-m)/0.2+offset;}
+    function t(x) {
+        var t = t_del*(x-offset)/w+t_min;
+        t = Math.round(t*100)/100;
+        if(t<0.005) t=0.001;
+        if(t>4.0) t=4.0;
+        return t;
+    }
+
+    function addPoint(t,m,a) {
+        if(a==0) context.fillStyle = "rgba(6, 15, 153,0.5)";
+        else context.fillStyle = "rgba(0,0,0,0.5)";
+        context.beginPath();
+        context.arc( x(t), y(m), 2,0,2*Math.PI,true);
+        context.fill();
+    }
+
+    function reset() {
+        context.fillStyle = "#fffce0";
+        context.fillRect(0,0,width-6,height-6)
+
+        context.lineWidth = 1;
+
+        context.strokeStyle = "#fffce0";
+        for(var i=0;i<36;++i)  {
+            context.beginPath();
+            context.moveTo(offset+i*w, 6);
+            context.lineTo(offset+i*w, height-6);
+            context.stroke();
+        }
+        for(var i=0;i<11;++i) {
+            context.beginPath();
+            context.moveTo(0, (offset+i*w)+6);
+            context.lineTo(width, (offset+i*w)-6);
+            context.stroke();
+        }
+
+        context.strokeStyle = "#000000";
+        for(var i=0;i<36;i+=5)  {
+            context.beginPath();
+            context.moveTo(offset+i*w, 6);
+            context.lineTo(offset+i*w, height-6);
+            context.stroke();
+        }
+        for(var i=0;i<11;i+=5) {
+            context.beginPath();
+            context.moveTo(6, offset+i*w);
+            context.lineTo(width-6, offset+i*w);
+            context.stroke();
+        }
+
+        context.strokeStyle = "#000000";
+        context.beginPath();
+        context.moveTo(0, height/2);
+        context.lineTo(width, height/2);
+        context.stroke();
+    }
+
+    return {
+        addPoint: addPoint,
+        reset: reset,
+        getT: t
+    }
+}
+
+var hbath = HBath();
+var graph = Graph();
+
+$(function () {
+    var initT = 2.500, timerID;
+
+    function setT(t) {
+        var t = Math.round(t*100)/100;
+        $( "#temperature_value" ).text( t );
+        hbath.setTemp(t);
+        $("#temperature").slider("setValue", t);
+    }
+
+
+
+    function cool() {
+        var T = hbath.getTemp();
+        var dt = 0.1, interval = 1000;
+        if(T>2.4) {
+            dt = 0.1; interval = 1000;  
+        } else if(T>1.8 && T<=2.4) {
+            dt = 0.1; interval = 25000;
+        } else {
+            dt = 0.1; interval = 5000;
+        } 
+		
+        T =  ((T-dt)*100 )/100;
+        if (T<0.051) {
+            T = 4.1;
+            
+        }
+        t=T
+        setT(T);
+        timerID = setTimeout(cool, interval);
+        hbath.start();
+    }
+    
+    function heat() {
+       var T = hbath.getTemp();
+        var dt = 0.1, interval = 1000;
+        if(T>2.4) {
+            dt = 0.1; interval = 1000;  
+        } else if(T>1.8 && T<=2.4) {
+            dt = 0.1; interval = 25000;
+        } else {
+            dt = 0.1; interval = 5000;
+        } 
+		
+        T =  ((T+dt)*100 )/100;
+        if (T>=4.0) {
+            T = 0.051;    
+        }
+        t=T
+        setT(T);
+        timerID = setTimeout(cool, interval);
+        hbath.start();
+    }
+    
+    function stopCool() {
+        clearTimeout(timerID);
+        if ($("#auto").hasClass("active")) {
+            $("#auto").button("toggle");
+        }
+    }
+    
+    function stopHeat() {
+        clearTimeout(timerID);
+        if ($("#autoUp").hasClass("active")) {
+            $("#autoUp").button("toggle");
+        }
+    }
+
+
+    var t_slider = $("#temperature").slider({
+        min: 0.05,
+        max: 4.0,
+        step: 0.01,
+        value: initT
+    });
+
+    t_slider.on("slide", function(e) {
+        setT( e.value );
+    });
+    t_slider.prev().on("mouseup",function() {
+        setT( t_slider.slider("getValue") );
+    });
+
+    $("#start").on("click", hbath.start);
+    $("#stop" ).on("click", function() {
+        stopCool();
+        hbath.stop();
+    });
+    $("#step").on("click", function() {
+        stopCool();
+        hbath.step();
+    });
+
+    $("#algorithm").on("change", function() {
+        hbath.setAlgorithm( $(this).val() );
+    });
+
+    $("#graph").on("click", function(e) {
+        var x  = (e.offsetX || e.clientX - $(e.target).offset().left); 
+        setT( graph.getT(x) );
+    });
+
+    $("#clear").on("click", graph.reset);
+
+    $("#auto").on("click", function(e) {
+        $(this).button("toggle");
+        if($(this).hasClass("active")) {
+            cool();
+        } else {
+            stopCool();
+        }
+    });
+    
+     $("#autoUp").on("click", function(e) {
+        $(this).button("toggle");
+        if($(this).hasClass("active")) {
+            heat();
+        } else {
+            stopHeat();
+        }
+    });
+
+    setT(initT);
+    hbath.start();
+});
+</script>
+
+</body> 
+
+</html>

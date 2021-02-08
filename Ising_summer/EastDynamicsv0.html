@@ -1,0 +1,107 @@
+
+<!DOCTYPE HTML>
+<html>  
+
+<head>
+    <meta charset="utf-8">
+    <title>East Dynamics 1D - Rectangular Domain</title>
+</head>
+
+<body style="width:550px; margin-left:auto; margin-right:auto; background-color:#bababa">
+
+<h2 style="text-align:center;">East Dynamics 1D</h2>
+
+<div style="width:500px; margin-left:auto; margin-right:auto;">
+    <canvas id="theCanvas" width="500" height="500">
+    </canvas>
+</div>
+
+<div style="text-align:center;background-color:#c0c0c0">
+    Temperature = <span id="tempReadout">2.27</span> 
+    <input id="tempSlider" type="range" min="0.01" max="9.99" step="0.01" value="2.27" oninput="showTemp();" onchange="showTemp();" style="width:180px"/>
+    <input id="startButton" type="button" onclick="startStop()" value="  Start  " style="font-size:large;"/>
+</div>
+<script>
+    // Global variables:    
+    
+    var size = 40;  
+    var sizej = 10;                         // lattice dimension in each direction (must divide canvas size)
+    var canvas = document.getElementById('theCanvas');
+    var context = canvas.getContext('2d');
+    var squareWidth = canvas.width / size;      // width of each lattice site in pixels
+    var stepsPerFrame = 10;                  
+    var running = false;                        // will be true when running
+    var startButton = document.getElementById('startButton');
+    var tempSlider  = document.getElementById('tempSlider');
+    var tempReadout = document.getElementById('tempReadout');
+
+    // Create the 2D array of dipoles, initially random (1 for up, -1 for down):
+    var s = new Array(size);
+    for (var i=0; i<size; i++) {
+        s[i] = new Array(size);             // a 2D array is just an array of arrays
+        for (var j=0; j<sizej; j++) {
+            if (i==size-1 && j == 0 || i==size-2 && j == 0 || i==size-2 && j == 1 || i==size-1 && j == 1 || i==size-1 && j == 2 || i==size-2 && j == 2 || i==size-1 && j == 3 || i==size-2 && j == 3 || i==size-2 && j == 4 || i==size-1 && j == 4 || i==size-2 && j == 5 || i==size-1 && j == 5 || i==size-2 && j == 6 || i==size-1 && j == 6 || i==size-2 && j == 7 || i==size-1 && j == 7 || i==size-2 && j == 8 || i==size-1 && j == 8 || i==size-2 && j == 9 || i==size-1 && j == 9){
+            	s[i][j] = 1;
+            	}
+            else s[i][j] = 0;
+            colorSquare(i, j);
+        }
+    }
+
+    simulate();   
+      
+    // Simulate function executes a bunch of steps and then schedules another call to itself:
+    function simulate() {
+        if (running) {
+            var T = Number(tempSlider.value);
+            for (var step=0; step<stepsPerFrame; step++) {
+                var i = Math.floor(Math.random()*size);         // choose a random site
+                var j = Math.floor(Math.random()*sizej);
+                if (s[i][j] == 1 && s[i-1][j] == 0){
+                var eDiff = deltaU(i, j);
+                if (((eDiff <=0) && (s[i][j] == s[i+1][j])) || ((s[i][j] == s[i+1][j])&&(Math.random() < Math.exp(-eDiff/T)))) {  // Metropolis algorithm
+                    s[i-1][j] = 1;
+                    colorSquare(i, j);
+                }
+                }
+            }
+        }
+        window.setTimeout(simulate, 1);     // schedule next animation frame for 1 ms later
+    }
+    
+    // Given a lattice site, compute energy change from hypothetical flip; note pbc:
+    function deltaU(i, j) {
+        var leftS, rightS, topS, bottomS;  // values of neighboring spins
+        if (i == 0) leftS = s[size-1][j];   else leftS = s[i-1][j];
+        if (i == size-1) rightS = s[0][j];  else rightS = s[i+1][j];
+        if (j == 0) topS = s[i][sizej-1];    else topS = s[i][j-1];
+        if (j == sizej-1) bottomS = s[i][0]; else bottomS = s[i][j+1];
+        return 2.0 * s[i][j] * (leftS + rightS + topS + bottomS);
+    }
+
+    // Color a given square according to its alignment:
+    function colorSquare(i, j) {
+        if (s[i][j] == 1) context.fillStyle = '#8000ff';    // purple
+            else context.fillStyle = '#ffffff';             // white
+        context.fillRect(i*squareWidth, j*squareWidth, squareWidth, squareWidth);       
+    }
+
+    // Function to start or pause the simulation:
+    function startStop() {
+        running = !running;
+        if (running) {
+            startButton.value = " Pause ";
+        } else {
+            startButton.value = "Resume";
+        }
+    }
+
+    // Function to update the temperature readout:
+    function showTemp() {
+        tempReadout.innerHTML = Number(tempSlider.value).toFixed(2);
+    }
+
+</script>
+    
+</body>
+</html>

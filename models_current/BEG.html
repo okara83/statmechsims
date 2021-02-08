@@ -1,0 +1,897 @@
+ <!DOCTYPE html>
+<!-- 
+_author__      = "Onur Kara"
+__copyright__   = "Copyright 2017, College Park, MD"
+###Blume-Capel Spin-1 Model Simulation Suite### 
+-->
+<!-- Blume-Capel Model
+Periodic boundary conditions - This seems to work and give phase separation quite rapidly at temps below T_c.
+Note I disabled most of the buttons that for modifying setting  (except Temp and steps per frame) for debugging purposes
+-->
+
+<html>
+    <head>
+       <style>
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    -webkit-animation-name: fadeIn; /* Fade in the background */
+    -webkit-animation-duration: 0.4s;
+    animation-name: fadeIn;
+    animation-duration: 0.4s
+}
+
+/* Modal Content */
+.modal-content {
+    position: fixed;
+    bottom: 0;
+    background-color: #fefefe;
+    width: 100%;
+    -webkit-animation-name: slideIn;
+    -webkit-animation-duration: 0.4s;
+    animation-name: slideIn;
+    animation-duration: 0.4s
+}
+
+/* The Close Button */
+.close {
+    color: white;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-header {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+}
+
+.modal-body {padding: 2px 16px;}
+
+.modal-footer {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+}
+
+/* Add Animation */
+@-webkit-keyframes slideIn {
+    from {bottom: -300px; opacity: 0}
+    to {bottom: 0; opacity: 1}
+}
+
+@keyframes slideIn {
+    from {bottom: -300px; opacity: 0}
+    to {bottom: 0; opacity: 1}
+}
+
+@-webkit-keyframes fadeIn {
+    from {opacity: 0}
+    to {opacity: 1}
+}
+
+@keyframes fadeIn {
+    from {opacity: 0}
+    to {opacity: 1}
+}
+</style>
+<script type=”text/javascript”
+src=”https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js/MathJax.js?config=TeX-AMS-MML_HTMLorMML“></script>
+</head>
+<body>
+
+
+
+
+<h2> </h2>
+
+<!-- Trigger/Open The Modal -->
+<button id="myBtn">Introduction and Program Summary</button>
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="close">&times;</span>
+      <h2>Spin-1 Blume-Chapel Model</h2>
+    </div>
+    <div class="modal-body">
+      <p>This application simulates the Spin-1 Blume-Chapel model on the square lattice (dimension=2). The programs requires Javascript is enabled and
+      that your browser is fairly updated. </p>
+      <p>The spin-1 Ising model with bilinear and biquadratic nearest-neighbor pair interactions and a single-ion potential is known as the Blume-Capel (BC) model.
+      The model with vanishing biquadratic interactions is called the Blume-Capel model. </p>
+    </div>
+    <div class="modal-footer">
+      <h3>The Hamiltonian for the Blume-Chapel model is:</h3>
+      <img src="http://latex.codecogs.com/png.latex?\inline \mathcal{H} =  -J\sum\limits_{\left<i,j\right>} s_i s_j - \textbf{K}\sum\limits_{\left<i,j\right>}^N s_i^2 s_j^2 + \textbf{D}\sum\limits_{i}^N s_i^2  " alt="\inline SOME LATEX" />
+    </div>
+  </div>
+
+</div>
+
+        <title>Spin-1 Blume-Capel Model</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="">
+        <style>
+            body {text-align: center;}
+            .sideBySide { /*makes elements display side by side */
+                display:inline-block;
+                vertical-align: top;
+                margin-bottom: 1cm;  /*also adds vertical space after block */
+            }
+             .verticalSpace {
+                margin-bottom: .5cm;
+            }
+
+            input[type = number]{
+                width: 60px;
+            }
+
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+    </head>
+
+    <body>
+        <div>
+            <h1> Blume-Capel Model</h1>
+        </div>
+
+        <div class = "sideBySide">
+            <canvas id ="theCanvas" width ="600" height ="600"> Canvas not supported on this browser </canvas>
+        </div>
+        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+        <div class = "sideBySide">
+            <p><b> Data </b></p>
+            <div><input type ="button" value ="Reset Stats" onclick ="resetData()"/></div>
+            <div class = "verticalSpace"><table border="1" width="3" cellpadding="4">
+                   <thead>
+                   </thead>
+                   <tbody>
+                       <tr>
+                           <td>Steps</td>
+                           <td id = "Steps">0</td>
+                       </tr>
+                       <tr>
+                           <td>Energy</td>
+                           <td id = "Energy">0</td>
+                       </tr>
+                       <tr>
+                           <td>Average Energy</td>
+                           <td id = "Eav">0</td>
+                       </tr>
+                       <tr>
+                           <td>Sigma Energy</td>
+                           <td id = "SigmaE">0</td>
+                       </tr>
+                       <tr>
+                           <td>Magnetization</td>
+                           <td id = "M">0</td>
+                       </tr>
+                       <tr>
+                           <td>Average Magnetization</td>
+                           <td id = "Mav">0</td>
+                       </tr>
+                       <tr>
+                           <td>Sigma Magnetization</td>
+                           <td id = "SigmaM">0</td>
+                       </tr>
+                   </tbody>
+               </table>
+            </div>
+ <select id = "algorithmSelect" onchange = "changeAlgorithm()">
+                <option>BC Model</option>
+                
+            </select>
+            <div>
+            <button id="myButton" class="float-left submit-button" >Wolff</button></div>
+
+<script type="text/javascript">
+    document.getElementById("myButton").onclick = function () {
+        location.href = "wolff.html";
+    };
+</script>
+<button id="IsingHome" class="float-left submit-button" >Ising Home</button>
+
+<script type="text/javascript">
+    document.getElementById("IsingHome").onclick = function () {
+        location.href = "IsingModelIndex.html";
+    };
+</script></div>
+
+            <!--<p> <b> Nanotube Settings: </b></p>
+            <div>Thickness: <input type ="number" id ="nThicknessInput" value = "2" min ="0" max ="150"/> </div>
+            <div>Diameter: <input type ="number" id ="nDiameterInput" value = "15" min ="0" max ="298"/> </div>
+            <div>Height: <input type ="number" id ="nHeightInput" value ="50" min ="0" max ="300"/> </div>
+            <div>Spin: <select id = "nSpinSelect">
+                    <option>Positive</option>
+                    <option>Negative</option>
+                </select> </div>
+            <div class = "verticalSpace"> <input type="button" value="Create Nanotube" onclick = "makeNanotube()"/> </div>
+            <div> <p id = "molRatioReadout">Mole Ratio: .5 Up and .5 Down</p><input type ="range" min ="0" id ="molRatioSlider" onchange = "changeMolRatio()"/> </div>
+            <div class ="verticalSpace"><input type ="button" value ="Execute Mole Ratio" onclick ="execMolRatio()"/> </div>-->
+            <div><p id = "spfReadout"> Steps Per Frame: 10000</p> <input type ="range" min ="1" max ="7" value = "4" id = "spfSlider" onchange = "changeSpf()"/> </div>
+       </div>
+
+
+        <div class = "verticalSpace">
+            Temperature: <input type="number" id ="tempInput" step = "0.01" value ="1.42" onchange = "changeT()" min = "0.0"/>
+            &nbsp; &nbsp;
+            Magnetic Field: <input type="number" id ="BfieldInput" step = "0.01" value ="0.0" onchange = "changeBfield()"/>
+            &nbsp; &nbsp;
+            <select id ="magnetSelect" onchange = "changeMagnet()">
+                <option>Ferromagnetic</option>
+                <option>Anti-Ferromagnetic</option>
+                <option>Bipartite</option>
+            </select>
+            &nbsp; &nbsp;
+            Size: <select id="sizeSelect" onchange = "resize()">
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                    <option>8</option>
+                    <option>10</option>
+                    <option>25</option>
+                    <option>40</option>
+                    <option>50</option>
+                    <option>75</option>
+                    <option>100</option>
+                    <option>200</option>
+                    <option>300</option>
+                    <option>600</option>
+                </select>
+                &nbsp; &nbsp;
+                
+                &nbsp;&nbsp;
+                Local Magnetic Field: <input type = "number" id ="SettleB" value ="0.0" min ="-10.0" max ="10.0" onchange = "changeSettleB()"/>
+
+              </div>
+            &nbsp; &nbsp;
+             <div>
+            Proportion +1 Spin: <input type="number" id ="upSpinInput" step = "0.01" value ="0.33" onchange = "changespins()" min = "0.0"/>
+            Proportion -1 Spin: <input type="number" id ="downSpinInput" step = "0.01" value ="0.33" onchange = "changespins()" min = "0.0"/>
+            &nbsp; &nbsp;
+          </div>
+
+            &nbsp; &nbsp;
+            <div class ="verticalSpace"><input type ="button" value ="Execute Ratios" onclick ="execRatios()"/><input type="button" value=" Start " id="startButton" onclick ="startStop()"/></div>
+
+            <!--&nbsp; &nbsp;
+            <select id = "boundarySelect" onchange = "changeBoundaries()">
+                <option>Periodic Boundaries</option>
+                <option>Anti-periodic Boundaries (both directions)</option>
+                <option>Anti-periodic Boundaries (one direction)</option>
+                <option>Isolated Boundaries</option>
+                <option>Plus-Minus Boundaries (one direction)</option>
+                <option>Skewed Plus Minus Boundaries</option>
+                <option>Plus Boundaries (both directions)</option>
+                <option>Minus Boundaries (both directions)</option>
+            </select>
+          -->
+        </div>
+        <div class = "verticalSpace">
+            <!--Show Fixed Spin: <input type = "checkbox" id = "showSpin" onclick = "changeShowSpin()"/>
+            &nbsp;&nbsp;-->
+            <!--
+           <input type ="button" value ="Randomize" id ="randomizeButton" onclick ="randomize()"/>
+            &nbsp;&nbsp;
+           <input type ="button" value ="Align" onclick ="makeAllOneColor()"/>
+           &nbsp;&nbsp;
+           <input type ="button" value ="Restart" onclick ="restart()" id = "restartButton" disabled>
+           &nbsp;&nbsp;
+           <input type ="button" value ="Restart with Aligned Lattice" onclick ="restartFromAligned()"/>
+           &nbsp;&nbsp;
+           <input type="button" value="Restart with Random Lattice" onclick="restartFromRandom()" />
+        </div>
+      -->
+
+<!--
+        <div class = "verticalSpace">
+            Filename to Save As: <input id="inputFileNameToSaveAs"/>
+            <input type ="button" value ="Save" onclick="saveTextAsFile()"/>
+        </div>
+
+        <div>
+            Select a file to load: <input type ="file" id ="fileToLoad" onclick = "enableOpen()"/>
+            <input type="button" value ="Open" onclick="loadFileAsText()" disabled id = "openButton"/>
+        </div>
+
+        <p id ="show"></p>
+
+-->
+
+        <script>
+             //variables from html, organized by how they appear top to bottom, left to right on the webpage
+
+
+            var canvas = document.getElementById("theCanvas");
+            var context = canvas.getContext("2d");
+            var nThicknessInput = document.getElementById("nThicknessInput");// n = nanotube
+            var nDiameterInput = document.getElementById("nDiameterInput");
+            var nHeightInput = document.getElementById("nHeightInput");
+            var nSpinSelect = document.getElementById("nSpinSelect");
+            var molRatioSlider = document.getElementById("molRatioSlider"); //mol = mole
+            var molRatioReadout = document.getElementById("molRatioReadout");
+            var spfReadout = document.getElementById("spfReadout");
+            var spfSlider = document.getElementById("spfSlider");
+            var tempInput = document.getElementById("tempInput");
+            var upSpinInput = document.getElementById("upSpinInput");
+            var downSpinInput = document.getElementById("downSpinInput");
+            var BfieldInput = document.getElementById("BfieldInput");
+            var magnetSelect = document.getElementById("magnetSelect");
+            var sizeSelect = document.getElementById("sizeSelect");
+            var algorithmSelect = document.getElementById("algorithmSelect");
+            var boundarySelect = document.getElementById("boundarySelect");
+            var showSpinCheck = document.getElementById("showSpin");
+            var SettleBInput = document.getElementById("SettleB");
+            var startButton = document.getElementById("startButton");
+            var show = document.getElementById("show"); //for testing purposes
+            //data
+            var InnerLoopCount = 0;
+            var StepsPerLoop = Math.pow(10, Number(spfSlider.value)); // this*innerLoopCount rounded to the nearest hundredth = steps that are shown
+
+            var Ecurrent = 0.0; //energy of current loops in algorithm
+            var EsquaredTotal = 0.0; // declared to calculate sigmaE
+            var Etotal = 0.0; //total energy, declared to calculate average energy
+
+            var Mcurrent = 0.0; //magnetization of loop
+            var MsquaredTotal = 0.0; //see EsquaredTotal
+            var Mtotal = 0.0; //total magnetization, used in average
+
+            //inputs
+
+            var T = Number(tempInput.value); //temperature
+            var zeroT = false; //true when t = 0
+            var upSpinInput = Number(upSpinInput.value);
+            var downSpinInput = Number(downSpinInput.value);
+
+            var Bfield = Number(BfieldInput.value); //magnetic field
+
+            //initialize magnet options
+            magnetSelect.selectedIndex = 0; //ferromagnetic is the default
+            var CouplingConstant;
+            if(magnetSelect.value == "Ferromagnetic")
+                CouplingConstant = 1;
+            else
+                CouplingConstant = -1;
+            //size
+            sizeSelect.selectedIndex = 9;//default is 100
+            var Size = Number(sizeSelect.options[sizeSelect.selectedIndex].text);  // dimensions of lattice
+            var SquareWidth = canvas.width/Size; //size of each square determined by size of lattice
+            //var upRatio = 0.0; //for when you use the mol ratio creator slider/button, decimal of "up" spins
+           // changeMolRatioSettings();
+
+             function execRatios(){//actually creates the mole ratio
+             //decides the spin of the top part of the lattice by taking the opposite of the current spin (so when you press "executemolratio" again, it  flip the color of the top and bottom part)
+            var upSpinInput = Number(document.getElementById("upSpinInput").value);
+            var downSpinInput = Number(document.getElementById("downSpinInput").value);
+            for (var i = 0; i < Size; i++){
+                for (var j = 0; j < Size; j++){
+                    var randy = Math.random();
+                    if(randy <= Number(upSpinInput)){
+                        s[i][j] = 1;
+                        }
+                    else if((randy >= Number(upSpinInput)) && (randy <= Number(upSpinInput) + Number(downSpinInput) )){
+                        s[i][j] = -1;
+                        }
+                    else {
+                       s[i][j] = 0;
+                        }
+                    colorSquare(i, j);
+                    }
+                }
+
+               if (BC)
+                    ComputeEforBEG();
+           }
+
+
+
+
+
+            //algorithm
+            algorithmSelect.selectedIndex = 0; //default is metropolis
+            var BC;
+            if (algorithmSelect.value == "BC"){
+                BC = true;
+                }
+            else{
+            	stop(); //stops simulation
+            }
+            //boundary conditions
+            //boundarySelect.selectedIndex = 0; //default is regular pbc
+            var pbc = true;
+            var ApbcBothDirections = false;
+            var ApbcOneDirection = false;
+            var FreeBound = false; //for isolated boundaries
+            //for all boundary condiitons below, they are really just pbc with fixed positive or negative edges
+            var PlusMinus = false;
+            var skewedPlusMinus = false;
+            var plusBothDirections = false;
+            var minusBothDirections = false;
+
+            //var showSpin = showSpinCheck.checked; // if true will show in a different color the squares that are manually changed
+
+            var SettleB = SettleBInput.value; //Dipole Settle Mode-what the square will flip to when it is clicked on
+
+            var maxSize = canvas.width; //used in resize()
+            var running = false; //true when running
+
+
+            function colorSquare(i, j) {
+        if (s[i][j] == 1){
+        	context.fillStyle = '#FE0105'; // purple
+        	}
+        if (s[i][j] == 0){
+        	context.fillStyle = '#000102';     // ehite
+        	}
+        if (s[i][j] == -1){
+        	context.fillStyle = '#FEE901';	//red
+        }
+        context.fillRect(i*SquareWidth, j*SquareWidth, SquareWidth, SquareWidth);
+    }
+            //sets local magnetic field of all dipoles to zero initially
+            var BfieldM = new Array(Size);
+            for (var i = 0; i < Size; i++){
+                BfieldM[i] = new Array(Size);
+                for (var j = 0; j < Size; j++){
+                    BfieldM[i][j] = 0;
+                }
+            }
+
+
+
+
+            //sets a random 2D array of dipoles and colors them accordingly
+
+            var s = new Array(Size);
+            for (var i = 0; i < Size; i++){
+
+                s[i] = new Array(Size);
+                for (var j = 0; j < Size; j++){
+                    var randy = Math.random()
+                    if(randy <= Number(upSpinInput)){
+                        s[i][j] = 1;
+                        }
+                    else if((randy >= upSpinInput) && (randy <= upSpinInput + downSpinInput)){
+                        s[i][j] = -1;
+                        }
+                    else {
+                       s[i][j] = 0;
+                        }
+                    colorSquare(i, j);
+                    }
+                }
+
+       pSpin = new Object();
+	   downSpin = new Object();
+	   zeroSpin = new Object();
+		   	 //var allSpins = new Object();
+		   	 var ups = 0;
+		   	 var downs = 0;
+		   	 var zers = 0
+           		for (var m = 0; m < Size; m++){
+        			for (var n = 0; n < Size; n++){
+      		    		if(s[m][n] > 0){
+                	    	var ordered = [m,n];
+                	    	pSpin[ups] = ordered;
+                	    	ups= ups +1;
+                	    	}
+                	    else if (s[m][n] < 0) {
+                  			var ordered = [m,n];
+                   			downSpin[downs] = ordered;
+        					downs = downs+1;
+                    			}
+                    	else {
+                    		var ordered = [m,n];
+                    		zeroSpin[zers] = ordered;
+                    		zers = zers+1
+                    		}
+                    	}
+                    	}
+
+      function simulate(){
+                if(running){
+                        MetropolisforBEG();
+                           Cumulate();
+
+                }
+                DisplayData();
+                window.setTimeout(simulate, 1); //comes back in 1 millisecond
+
+            }
+
+  var initS;
+            var initBfieldM;
+            var initSettings;
+
+            //computes current energy of original lattice before simulation begins (resetData() then resets the averages, not current energy)
+            if (true){
+                ComputeEforBEG();
+           		 resetData();
+           		 simulate();
+ 			}
+
+
+
+ function MetropolisforBEG(){
+    for(var step = 0; step <StepsPerLoop; step++){
+        var i1 = Math.floor(Math.random()*Size);
+        var j1 = Math.floor(Math.random()*Size);
+        var i2 = Math.floor(Math.random()*Size);
+        var j2 = Math.floor(Math.random()*Size);
+                    if(s[i1][j1] != s[i2][j2]){
+                        var thisS = s[i1][j1];
+                        var thatS = s[i2][j2];
+                        var EdiffforM = deltaUforBEGforM(i1, j1, i2, j2);
+                        var Ediff = deltaUforBEG(i1, j1, i2, j2);
+                        if(zeroT){ //to avoid dividing by zero
+                            if((EdiffforM < 0.0) || ((EdiffforM == 0) && (Math.random() < .5))){ //always flip if deltaU is negative
+                                s[i1][j1] = thatS;
+                                s[i2][j2] = thisS;
+                                colorSquare(i1, j1);
+                                colorSquare(i2, j2);
+                                Ecurrent += Ediff;
+                                Mcurrent += ((2*thisS) + (2*thatS));
+
+                            }
+                           }
+                       		else if ((EdiffforM <= 0.0) || (Math.random() < Math.exp((-EdiffforM)/T))){
+                            s[i1][j1] = thatS;
+                            s[i2][j2] = thisS;
+                            colorSquare(i1, j1);
+                            colorSquare(i2, j2);
+                            Ecurrent += Ediff;
+                            Mcurrent += ((2*thisS) + (2*thatS));
+
+                        }
+                    }
+                }
+            InnerLoopCount++;
+            //console.log(Mtotal)
+            }
+
+
+ 		function deltaUforBEG(i1,j1, i2, j2){
+                var thisS = s[i1][j1];
+                var thatS = s[i2][j2];
+
+                var left1 = getLeft(i1,j1);
+                var right1 = getRight(i1,j1);
+                var top1 = getTop(i1,j1);
+                var bottom1 = getBottom(i1,j1);
+
+                var left2 = getLeft(i2,j2);
+                var right2 = getRight(i2,j2);
+                var top2 = getTop(i2,j2);
+                var bottom2 = getBottom(i2,j2);
+                 if ((j2 == 0 && j1 == Size - 1 && i2 == i1) || (j2 == Size - 1 && j1 == 0 && i2 == i1) || (i2 == 0 && i1 == Size - 1 && j2 == j1)
+                || (i2 == Size - 1 && i1 == 0 && j2 == j1)) {
+                    if (pbc || ApbcBothDirections || ApbcOneDirection || PlusMinus)
+                      return (2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) +
+                          2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) +
+                          4.0*CouplingConstant + 2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][j2]));
+                    else if (FreeBound)
+                      return (2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) +
+                          2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) +
+                          2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][2]));
+                  }
+                else if ((j2 == j1+1 && i2 == i1) || (j1 == j2 + 1 && i1 == i2) || (j2 == j1-1 && i2 == i1) ||
+                (j1 == j2 - 1 && i1 == i2) || (j2 == j1 && i2 == i1+1) || (j1 == j2 && i1 == i2 + 1) ||
+                (j2 == j1 && i2 == i1-1 || j1 == j2 && i1 == i2 - 1))
+                    return (2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) +
+                        2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) +
+                        4.0*CouplingConstant + 2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][j2]));
+                else
+                    return (2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) +
+                        2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) +
+                        2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][j2]));
+
+
+
+            }
+
+
+
+            //energy change with local magnetic field
+		function deltaUforBEGforM(i1, j1, i2, j2){
+                var thisS = s[i1][j1];
+                var thatS = s[i2][j2];
+                var left1 = getLeft(i1,j1);
+                var right1 = getRight(i1,j1);
+                var top1 = getTop(i1,j1);
+                var bottom1 = getBottom(i1,j1);
+                var left2 = getLeft(i2,j2);
+                var right2 = getRight(i2,j2);
+                var top2 = getTop(i2,j2);
+                var bottom2 = getBottom(i2,j2);
+                 if (((j2 == j1+1) && i2 == i1) || ((j1 == j2 + 1) && i1 == i2) || ((j2 == j1-1) && (i2 == i1))
+                || (j1 == j2 - 1 && i1 == i2) || (j2 == j1 && i2 == i1+1) || (j1 == j2 && i1 == i2 + 1) ||
+                (j2 == j1 && i2 == i1-1) || (j1 == j2 && i1 == i2 - 1)){
+                    return 2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) + 2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) + 4.0*CouplingConstant + 2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][j2]);
+
+              }
+                else
+                  return 2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) + 2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) + 2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][j2]);
+
+
+            }
+
+                //computes total energy from scratch when using the BC algorithm
+            function ComputeEforBEG(){
+                Ecurrent = 0.0;
+                Mcurrent = 0.0;
+                for(var i=0; i<Size; i++){
+                    for(var j=0; j<Size; j++){
+                        var right = getRight(i,j);
+                        var left = getLeft(i,j);
+                        var top = getTop(i,j);
+                        var bottom = getBottom(i,j);
+                        var thisSS = s[i][j];
+                        Ecurrent = Ecurrent - .5*CouplingConstant*thisSS*(right+left+top+bottom)-thisSS*Bfield
+                        Mcurrent += thisSS;
+                    }
+                }
+            }
+
+            //returns the dipole to the left of s[i][j] taking into account boundary conditions
+            function getLeft(i, j){
+                if (j == 0) {
+                        return s[i][Size -1];
+                        }
+                else{
+                    return s[i][j-1];
+                    }
+            }
+
+            function getRight(i, j){
+                if (j == Size-1) {
+                        return s[i][0];
+                        }
+                   else{
+                     return s[i][j+1];
+                     }
+            }
+            //dipole above s[i][j] with boundary conditions
+            function getTop(i, j){
+                if (i==0){
+                        return s[Size-1][j];
+                    }
+                 else{
+                     return s[i-1][j];
+            }
+            }
+            //dipole below with boundary conditions
+            function getBottom(i,j){
+                if (i==Size-1){
+                         return s[0][j];
+                         }
+                 else{
+                     return s[i+1][j];
+            }
+            }
+
+             function colorAll(){
+                for(var i = 0; i < Size; i++)
+                {
+                    for(var j = 0; j < Size; j++){
+                        colorSquare(i,j);
+                    }
+                }
+            }
+
+            function colorAllAndResetBfieldM(){ //recolors squares and resets Bfield (for use in the boundary conditions)
+                for(var i = 0; i < Size; i++)
+                {
+                    for(var j = 0; j < Size; j++){
+                        BfieldM[i][j] = 0;
+                        colorSquare(i,j);
+                    }
+                }
+            }
+
+             function resetData(){
+                InnerLoopCount = 0;
+                Etotal = 0;
+                EsquaredTotal = 0;
+                Mtotal = 0;
+                MsquaredTotal = 0;
+                DisplayData();
+            }
+              function Cumulate(){
+                Etotal += Ecurrent;
+                EsquaredTotal += (Ecurrent*Ecurrent);
+                Mtotal += Mcurrent;
+                MsquaredTotal += (Mcurrent*Mcurrent);
+            }
+
+            function changeAlgorithm(){
+                metropolis = !metropolis;
+            }
+
+            //these functions all have to do with the buttons in the html and are organized by their order of appearance from top to bottom, left to right
+                function startStop(){
+                running = !running;
+                if(running)
+                    startButton.value = " Pause ";
+
+                else
+                    startButton.value = " Start ";
+
+
+            }
+
+
+              //changes data display of energy and magnitization
+            function DisplayData(){
+                var Steps, Eav, Esquaredav, SigmaE, Mav, Msquaredav, SigmaM;
+                if(InnerLoopCount == 0){
+                    Steps = 0;
+                    Eav = 0.0;
+                    SigmaE = 0.0;
+                    Mav = 0.0;
+                    SigmaM = 0.0;
+                }
+                else{
+                    if(StepsPerLoop >= 100)
+                        Steps = InnerLoopCount*(StepsPerLoop/100)*100;
+                    else
+                        Steps = InnerLoopCount*StepsPerLoop; //can't round off to hundreths place if stepsPerLoop is below 100
+                    Eav = Etotal/InnerLoopCount;
+                    var Esquaredav = EsquaredTotal/InnerLoopCount;
+                    SigmaE = Math.sqrt(Esquaredav-(Eav*Eav));
+                    Mav = Mtotal/InnerLoopCount;
+                    Msquaredav = MsquaredTotal/InnerLoopCount;
+                    SigmaM = Math.sqrt(Msquaredav - (Mav*Mav));
+                }
+                var sizeSquared = Size*Size;
+                var data = [Steps, Ecurrent, Eav, SigmaE, Mcurrent, Mav, SigmaM];
+                var dataNames =["Steps", "Energy", "Eav", "SigmaE", "M", "Mav", "SigmaM"];
+                document.getElementById(dataNames[0]).innerHTML = data[0]; //because number of steps is the only data that doesn't have to be divided by sizeSquared
+                for(var i = 1; i < data.length; i++){ //starts at "Energy", looping through the two arrays saves space
+                    document.getElementById(dataNames[i]).innerHTML = (data[i]/sizeSquared).toFixed(3);
+
+            }
+        }
+
+           function changeSettings(settings){
+                changeT();
+                changespins();
+                algorithmSelect.selectedIndex = settings[4];
+
+            }
+
+             function changeSpf(){
+               StepsPerLoop = Math.pow(10, Number(spfSlider.value));
+               spfReadout.innerHTML = " Steps Per Frame: " + StepsPerLoop;
+           }
+
+             function changeT(){
+                T = Number(tempInput.value);
+                if(T==0)
+                    zeroT = true;
+                else
+                    zeroT = false;
+               }
+             function changespins(){
+                upSpinInput = Number(upSpinInput.value);
+                downSpinInput = Number(downSpinInput.value);
+                if(upSpinInput + downSpinInput <= 1){
+                    zeroT = true;
+                    }
+                else{
+                    zeroT = false;
+                    }
+               }
+
+        </script>
+        <script>
+        //resizes lattice
+                // First up-sample the lattice into a temporary array at max resolution:
+            function resize() {
+                var tempS = new Array(maxSize);
+            	for (var i = 0; i < maxSize; i++){
+                tempS[i] = new Array(maxSize);
+                for (var j = 0; j < maxSize; j++){
+                    var iOld = Math.floor(i / SquareWidth);
+                    var jOld = Math.floor(j / SquareWidth);
+                    tempS[i][j] = s[iOld][jOld];
+                    }
+                    }
+
+
+                // Get new size from GUI selector:
+                Size = Number(sizeSelect.options[sizeSelect.selectedIndex].text);
+                SquareWidth = canvas.width / Size;
+                // Now re-create the spin array, down-sampling from temporary array
+                s = new Array(Size);
+                        BfieldM = new Array(Size);
+                for (var iNew=0; iNew<Size; iNew++) {
+                    s[iNew] = new Array(Size);
+                    BfieldM[iNew] = new Array(Size);
+                    for (var jNew=0; jNew<Size; jNew++) {
+                        var sTotal = 0;
+                                                //iterates through one square in the new lattice
+                        for (var i=iNew*SquareWidth; i<(iNew+1)*SquareWidth; i++) {
+                            for (var j=jNew*SquareWidth; j<(jNew+1)*SquareWidth; j++) {
+                            sTotal += tempS[i][j];
+                            }
+                        }
+                        if (sTotal > 0) {
+                            s[iNew][jNew] = 1;// average determines down-sampled value of that square
+                        }
+                        else if (sTotal < 0) {
+                            s[iNew][jNew] = -1;
+                        }
+                        else { //
+                        s[iNew][jNew] = 0;
+                        }
+                        BfieldM[iNew][jNew] = 0;
+                        colorSquare(iNew, jNew);
+                    }
+                }
+
+
+
+                resetData();
+
+
+                ComputeEforBEG();
+
+               changeNanotubeSettings();
+               changeMolRatioSettings();
+
+	}
+
+        </script>
+
+
+    <script>
+// Get the modal
+var modal = document.getElementById('myModal');
+
+// Get the button that opens the modal
+var btn = document.getElementById("myBtn");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the modal
+btn.onclick = function() {
+    modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+    modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+</script>
+    </body>
+</html>
