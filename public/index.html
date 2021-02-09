@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ISING MODELS</title>
+
+  <!-- JQUERY -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <!-- BOOTSTRAP -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+
+  <!-- CUSTOM -->
+  <link rel="stylesheet" href="./css/style.css">
+
+</head>
+
+<body>
+  <!-- HEADER NAV -->
+  <div id="header-nav-wrapper">
+    <ul class="nav nav-tabs">
+      <li id="header-nav-title">
+        <h4>Ising Models</h4>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="#">Metropolis</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Kawasaki (non-local)</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Kawasaki (local)</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Blume-Capel</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Wolff</a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- CONTENT BODY -->
+  <div id="main-row" class="row">
+    
+    <!-- SIDEBAR: PARAMETERS -->
+    <div id="param-sidebar" class="sidebar">
+      <table id="param-table" class="table">
+        <thead><th scope="col">Parameters</th></thead>
+        <tbody>
+          
+          <tr>
+            <td>Temperature</td>
+          </tr>
+          <tr>
+            <td>Magnetic Field</td>
+          </tr>
+          <tr>
+            <td>Ferromagnetism</td>
+          </tr>
+          <tr>
+            <td>Set Configuration</td>
+          </tr>
+          <tr>
+            <td>Size</td>
+          </tr>
+          <tr>
+            <td>Periodic Boundaries</td>
+          </tr>
+          <tr>
+            <td>Show Fixed Spin</td>
+          </tr>
+          <tr>
+            <td>Local Magnetic Field</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="main-div" class="content-wrapper">
+      <!-- CANVAS -->
+      <canvas></canvas>
+
+      <!-- DATA -->
+      <div id="data-table-wrapper">
+        <table id="data-table" class="table table-primary table-striped">
+          <thead>
+            <th>Data</th>
+            <th></th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Steps</td>
+              <td>S#</td>
+            </tr>
+            <tr>
+              <td>Energy</td>
+              <td>E#</td>
+            </tr>
+            <tr>
+              <td>Average Energy</td>
+              <td>AE#</td>
+            </tr>
+            <tr>
+              <td>Sigma Energy</td>
+              <td>SE#</td>
+            </tr>
+            <tr>
+              <td>Magnetism</td>
+              <td>M#</td>
+            </tr>
+            <tr>
+              <td>Average Magnetism</td>
+              <td>AM#</td>
+            </tr>
+            <tr>
+              <td>Sigma Magnetism</td>
+              <td>SM#</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+  
+</body>
+</html>
