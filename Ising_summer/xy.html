@@ -1,0 +1,327 @@
+
+<html><head>
+<title>2D XY model</title>
+ <style type="text/css">
+   H1{ font-size: 100%; color: green}
+   H2{ font-size: 100%; color: green}
+ </style>
+
+<script id="shader-vs" type="x-shader/x-vertex">#version 300 es
+  in vec2 aPos;
+  out vec2 vTC;
+void main(void) {
+   gl_Position = vec4(aPos, 0., 1.);
+   vTC = .5*aPos + .5;
+}
+</script> 
+
+<script id="shader-fs" type="x-shader/x-fragment">#version 300 es
+precision highp float;
+precision highp int;
+  uniform highp usampler2D samp;
+  in vec2 vTC;
+  out uvec2 fragColor;
+  uniform float n;
+  uniform float h;
+  uniform int bw;
+  uniform float b;
+  const float c = 6.283/float(0xFFFF),  m = 2.*float(0x7FFFFFFFu);
+void main(void) {
+   uint r = texture(samp, vTC).r;
+   uint s = texture(samp, vTC).g;
+   if ( ((int(n*vTC.x) + int(n*vTC.y)) & 1) == bw){
+     r = 1664525u * r + 1013904223u;
+     int di = (int(r & 0xFFFFu) >> 4) - 2048;
+     float d = c*float(di);
+     uint snew = (s + uint(di + 0x10000)) & 0xFFFFu;
+     float sd = c*float(s) + d*.5;
+     float sum = sin(sd - c*float(texture(samp, vec2(vTC.x+h,vTC.y)).g));
+     sum += sin(sd - c*float(texture(samp, vec2(vTC.x-h,vTC.y)).g));
+     sum += sin(sd - c*float(texture(samp, vec2(vTC.x,vTC.y+h)).g));
+     sum += sin(sd - c*float(texture(samp, vec2(vTC.x,vTC.y-h)).g));
+     r = 1664525u * r + 1013904223u;
+     s = (float(r) < m*exp(-d*sum * b)) ? snew : s;
+   }
+   fragColor = uvec2(r, s);
+}
+</script> 
+ 
+<script id="shader-fs-show" type="x-shader/x-fragment">#version 300 es
+precision highp float;
+precision highp int;
+  uniform highp usampler2D samp;
+  in vec2 vTC;
+  out vec4 fragColor;
+  const float c = 6./(256.*256.);
+void main(void) {
+   float u = c*float(texture(samp, vTC).g);
+   fragColor = vec4(abs(u-3.)-1., 2.-abs(2.-u), 2.-abs(u-4.), 1.);
+}
+</script> 
+
+<script type="text/javascript">
+function getShader ( gl, id ){
+   var shaderScript = document.getElementById ( id )
+   var str = ""
+   var k = shaderScript.firstChild
+   while ( k ){
+     if ( k.nodeType == 3 ) str += k.textContent
+     k = k.nextSibling
+   }
+   var shader
+   if ( shaderScript.type == "x-shader/x-fragment" )
+           shader = gl.createShader ( gl.FRAGMENT_SHADER )
+   else if ( shaderScript.type == "x-shader/x-vertex" )
+           shader = gl.createShader(gl.VERTEX_SHADER)
+   else return null
+   gl.shaderSource(shader, str)
+   gl.compileShader(shader)
+   if (gl.getShaderParameter(shader, gl.COMPILE_STATUS) == 0)
+      alert(id + "\n" + gl.getShaderInfoLog(shader))
+   return shader
+}
+
+var gl, prog, prog_show, FBO, FBO1, texture, texture1, ctx,
+    cTemp, bHot = true, mouseDown = false,
+    timer, delay = 0, it = 10, frames = 0, time, animation, pix,
+    n = 512, sampLoc, bLoc, bwLoc, nLoc, hLoc, T = .03
+function main() {
+   var c = document.getElementById("c")
+   var err = "Your browser does not support "
+   if (!window.WebGLRenderingContext){
+     alert(err+"WebGL. See http://get.webgl.org")
+     return}
+   try { gl = c.getContext("webgl2")
+         if( !gl ) gl = c.getContext("experimental-webgl2")
+   } catch(e) {}
+   if ( !gl ) {alert("Can't get WebGL 2"); return}
+
+   cTemp = document.getElementById("cnvT")
+   cTemp.addEventListener('mousemove', drag, false);
+   cTemp.addEventListener('mousedown', function(){mouseDown = true}, false);
+   document.addEventListener('mouseup', function(){mouseDown = false}, false);
+   cTemp.addEventListener('touchstart', function(){mouseDown = true}, false);
+   cTemp.addEventListener('touchmove', continueTouch, false);
+   document.addEventListener('touchend', function(){mouseDown = false}, false);
+   ctx = cTemp.getContext("2d")
+   drawTemp()
+
+   var aPosLoc = 0
+   prog_show  = gl.createProgram()
+   gl.attachShader(prog_show, getShader( gl, "shader-vs" ))
+   gl.attachShader(prog_show, getShader( gl, "shader-fs-show" ))
+   gl.bindAttribLocation(prog_show, aPosLoc, "aPos")
+   gl.linkProgram(prog_show)
+
+   prog  = gl.createProgram()
+   gl.attachShader(prog, getShader( gl, "shader-vs" ))
+   gl.attachShader(prog, getShader( gl, "shader-fs" ))
+   gl.bindAttribLocation(prog, aPosLoc, "aPos")
+   gl.linkProgram(prog)
+   gl.useProgram(prog)
+   sampLoc  = gl.getUniformLocation(prog, "samp")
+   bwLoc  = gl.getUniformLocation(prog, "bw")
+   bLoc  = gl.getUniformLocation(prog, "b")
+   nLoc  = gl.getUniformLocation(prog, "n")
+   hLoc  = gl.getUniformLocation(prog, "h")
+   gl.enableVertexAttribArray( aPosLoc )
+   var data = new Float32Array([-1,-1,  1,-1,  -1,1,  1,1])
+   gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer())
+   gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW)
+   gl.vertexAttribPointer(aPosLoc, 2, gl.FLOAT, gl.FALSE, 0, 0)
+
+   gl.uniform1f(bLoc, .5/T)
+   gl.uniform1f(nLoc, n)
+   gl.uniform1f(hLoc, 1/n)
+   var t = 0
+   pix = new Uint32Array(2*n*n)
+   for(var i = 0; i<n; i++)
+     for(var j = 0; j<n; j++){
+       pix[t++] = 0xFFFFFFFF*Math.random()
+       pix[t++] = (bHot) ? Math.round(0xFFFF*Math.random()) : 0xA000
+//       pix[t++] = 128*i
+     }
+   texture1 = gl.createTexture()
+   gl.activeTexture(gl.TEXTURE1)
+   gl.bindTexture(gl.TEXTURE_2D, texture1)
+   gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1)
+   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32UI, n, n, 0,
+     gl.RG_INTEGER, gl.UNSIGNED_INT, pix)
+   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+
+   texture = gl.createTexture()
+   gl.activeTexture(gl.TEXTURE0)
+   gl.bindTexture(gl.TEXTURE_2D, texture)
+   gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1)
+   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32UI, n, n, 0,
+     gl.RG_INTEGER, gl.UNSIGNED_INT, pix)
+   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+
+   FBO = gl.createFramebuffer()
+   gl.bindFramebuffer(gl.FRAMEBUFFER, FBO)
+   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
+       gl.TEXTURE_2D, texture, 0)
+   FBO1 = gl.createFramebuffer()
+   gl.bindFramebuffer(gl.FRAMEBUFFER, FBO1)
+   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
+       gl.TEXTURE_2D, texture1, 0)
+   if( gl.checkFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE)
+     alert("FBOs are not complete")
+
+   timer = setInterval(fr, 500)
+   time = new Date().getTime()
+   animation = "animate"
+   anim()
+//draw()
+}
+function draw(){
+  gl.viewport(0,0, n,n);
+  gl.useProgram(prog)
+  for ( var i = 0; i < it;  i++ ){
+    gl.uniform1i(sampLoc, 0)
+    gl.uniform1i(bwLoc, 0)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, FBO1)
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+    gl.uniform1i(sampLoc, 1)
+    gl.uniform1i(bwLoc, 1)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, FBO)
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+  }
+  gl.viewport(0,0, 512,512);
+  gl.useProgram(prog_show)
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+  frames++
+}
+function drawTemp(){
+   ctx.clearRect(0,0, 32, 512)
+   if(T > 0) ctx.fillStyle = "#FF0000"
+   else ctx.fillStyle = "#0000FF"
+   var y = Math.abs(T)*512/2
+   ctx.fillRect(0,512-y, 32, y)
+   ctx.fillStyle = "#000000"
+   ctx.fillRect(0,512/2 - 3, 32,6)
+}
+function anim(){
+   draw()
+   switch ( animation ){
+     case "reset":
+      var t = 0, m = 0xFFFFFFFF
+      for(var i = 0; i<n; i++)
+        for(var j = 0; j<n; j++){
+          pix[t++] = m*Math.random()
+          pix[t++] = (bHot) ? Math.round(0xFFFF*Math.random()) : 0xA000
+        }
+      gl.activeTexture(gl.TEXTURE1)
+      gl.bindTexture(gl.TEXTURE_2D, texture1)
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32UI, n, n, 0,
+        gl.RG_INTEGER, gl.UNSIGNED_INT, pix)
+      gl.activeTexture(gl.TEXTURE0)
+      gl.bindTexture(gl.TEXTURE_2D, texture)
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32UI, n, n, 0,
+        gl.RG_INTEGER, gl.UNSIGNED_INT, pix)
+      animation = "animate"
+     case "animate":
+       if (delay == 0) requestAnimationFrame(anim)
+       else setTimeout("requestAnimationFrame(anim)", delay)
+       break
+     case "stop":
+       break
+   }
+}
+function run(v) {
+  if( animation == "animate" ){
+    animation = "stop"
+    document.getElementById('runBtn').value = "Run "}
+  else{
+    animation = "animate"
+    document.getElementById('runBtn').value = "Stop"
+    anim()
+  }
+}
+function reset() {
+  if( animation == "stop" ){
+    animation = "reset"
+    document.getElementById('runBtn').value = "Stop"
+    anim()}
+  else animation = "reset"
+}
+function fr(){
+  var ti = new Date().getTime()
+  var fps = Math.round(1000*frames/(ti - time))
+  document.getElementById("framerate").value = fps
+  frames = 0;  time = ti
+}
+function setT(val) {
+  gl.useProgram(prog)
+  gl.uniform1f(bLoc, .5/T)
+  drawTemp()
+}
+function setMag(s) {
+   n = 512/s.valueOf();
+   gl.useProgram(prog)
+   gl.uniform1f(nLoc, n)
+   gl.uniform1f(hLoc, 1/n)
+   var animation0 = animation
+   animation = "reset"
+   if(animation0 == "stop"){
+    document.getElementById('runBtn').value = "Stop"
+    anim()
+   }
+}
+function drag(ev){
+  ev.preventDefault()
+  if( !mouseDown ) return
+  if (!ev.clientX) ev = ev.touches[0]
+  var rect = cTemp.getBoundingClientRect()
+  T = 2*(1 - (ev.clientY - rect.top) / 512)
+  document.getElementById('T').value = Math.round(100*T)/100
+  setT()
+  drawTemp()
+}
+function continueTouch(evt) {
+  evt.preventDefault()
+  if( !mouseDown ) return
+  var y = evt.touches[0].pageY;
+
+  var rect = cTemp.getBoundingClientRect()
+  T = 2*(1 - (y - rect.top) / 512)
+  document.getElementById('T').value = Math.round(100*T)/100
+  setT()
+  drawTemp()
+}
+</script>
+
+<style type="text/css">
+  H1{ font-size: 100%;color: #000000}
+  H2{ font-size: 100%; color: #000000}
+</style>
+</head>
+<body onload="main()">
+<h1>XY model</h1>
+<canvas id="c" width="512" height="512"></canvas>
+<canvas id="cnvT" width="0" height="0"></canvas>
+<br><button onclick="Hot=true; reset()">Reset</button>
+<input type="button" onclick="run()" value="Pause" size="1" id="runBtn">
+CouplingConstant<input size="1" value="10" onchange="it=parseInt( this.value )">
+Temperature<input id="T" size="3" value="0.03" onchange="T=parseFloat(this.value);setT()">
+Magetic field
+<input size="1" value="0.89" onchange="setMag(this.options[this.selectedIndex].value)">
+
+&nbsp;FPS <input size="2" id="framerate"><br>
+
+
+
+
+
+
+Metropolis algorithm is used in this simulations.
+Interactin energies are calculated as
+<br>&nbsp; &nbsp; <i>&Delta;E<sub>i</sub> =
+ cos(&phi; + &delta;&phi; - &phi;<sub>i </sub>) -
+ cos(&phi; - &phi;<sub>i </sub>) =
+ 2 sin(&delta;&phi;) sin(&phi; + &delta;&phi;/2 - &phi;<sub>i </sub>).</i>
+</body>
+</html>
