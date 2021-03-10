@@ -1,14 +1,30 @@
 <!DOCTYPE html>
+<!--
+The Original/First Version of the HTML5 adaptation of the Ising Model Simulation comes from  Dan Schroeder  http://physics.weber.edu/schroeder/software/demos/IsingModel.html
+-->
+<!--
+Current Complete Version of Simulation Suite:
+__author__      = "Onur Kara"
+__copyright__   = "Copyright 2017, College Park, MD"
+###Ising Model Simulation Suite### 
+-->
 <html lang="en">
 <head>
+  <title>Ising Model</title>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ISING MODELS</title>
-
+  <link rel="shortcut icon" href="">
+  
   <!-- JQUERY -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
+  <!-- <script type=”text/javascript” src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  
+  <!-- MATHJAX -->
+  <script type=”text/javascript” src=”https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js/MathJax.js?config=TeX-AMS-MML_HTMLorMML“></script>
+  
+  <!-- CANVAS.JS -->
+  <script type="text/javascript" src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+  
   <!-- BOOTSTRAP -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
@@ -17,33 +33,35 @@
   <link rel="stylesheet" href="./css/style.css">
 
 </head>
-
 <body>
-  <!-- HEADER NAV -->
-  <div id="header-nav-wrapper">
-    <ul class="nav nav-tabs">
-      <li id="header-nav-title">
-        <h4>Ising Models</h4>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="#">Metropolis</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Kawasaki (non-local)</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Kawasaki (local)</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Blume-Capel</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Wolff</a>
-      </li>
-    </ul>
-  </div>
+  <!-- NAV -->
+  <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" id="ising-brand" href="#">Ising Models</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <span id="chooseAlgorithm" class="navbar-text">
+            Choose Algorithm:
+          </span>
+          <li class="nav-item dropdown">
+            <a id="algorithmBtn" class="btn btn-outline-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Metropolis</a>
+            <ul id="algorithmDropdown" class="dropdown-menu" aria-labelledby="algorithmDropdown">
+              <li><a class="dropdown-item active" href="#">Metropolis</a></li>
+              <li><a class="dropdown-item" href="#">Kawasaki (local)</a></li>
+              <li><a class="dropdown-item" href="#">Kawasaki (non-local)</a></li>
+              <li><a class="dropdown-item" href="#">Blume-Capel</a></li>
+              <li><a class="dropdown-item" href="#">Wolff</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 
-  <!-- CONTENT BODY -->
+  <!-- MAIN -->
   <div id="main-row" class="row">
     
     <!-- SIDEBAR: PARAMETERS -->
@@ -52,42 +70,166 @@
         <thead><th scope="col">Parameters</th></thead>
         <tbody>
           
+          <!-- to be deprecated -->
           <tr>
-            <td>Temperature</td>
+            <td>
+              <div class="form-group">
+                <label for="algorithmSelect">Algorithm</label>
+                <select id = "algorithmSelect" onchange = "changeAlgorithm()">
+                  <option>Metropolis</option>
+                  <option>Kawasaki(non-local)</option>
+                  <option>Kawasaki(local)</option>
+                  <option>Blume-Emery-Griffiths</option>
+                  <option>Wolff</option>
+                </select>
+              </div>
+            </td>
           </tr>
+
           <tr>
-            <td>Magnetic Field</td>
+            <td>
+              <div class="form-group row">
+                <label for="tempInput" class="col-sm-8 col-form-label">Temperature</label>
+                <div class="col-sm-4">
+                  <input class="form-control form-control-sm" type="number" id ="tempInput" step = "0.01" value ="2.27" onchange = "changeT()" min = "0.0"/>
+                </div>
+              </div>
+            </td>
           </tr>
+
           <tr>
-            <td>Ferromagnetism</td>
+            <td>
+              <div class="form-group row">
+                <label for="BfieldInput" class="col-sm-8 col-form-label">Magnetic Field</label>
+                <div class="col-sm-4">
+                  <input class="form-control form-control-sm" type="number" id ="BfieldInput" step = "0.01" value ="0.0" onchange = "changeBfield()"/>
+                </div>  
+              </div>
+            </td>
           </tr>
+
           <tr>
-            <td>Set Configuration</td>
+            <td>
+              <div class="form-group">
+                <label for="magnetSelect">Magnetism</label>
+                <select id ="magnetSelect" class="form-control form-control-sm" onchange = "changeMagnet()">
+                  <option selected="selected">Ferromagnetic</option>
+                  <option>Anti-Ferromagnetic</option>
+                  <option>Bipartite</option>
+                </select>
+              </div>
+            </td>
           </tr>
+
           <tr>
-            <td>Size</td>
+            <td>
+              <div class="form-group">
+                <label for="patternSelect">Pattern</label>
+                <select id ="patternSelect" class="form-control form-control-sm" onchange = "MakePattern()">
+                <!-- <select id ="patternSelect" class="form-control form-control-sm"> -->
+                  <option selected="selected">Set Configuration</option>
+                  <option>Cross</option>
+                  <option>Thick X</option>
+                  <option>Thin X</option>
+                  <option>Horizontal</option>
+                  <option>Vertical</option>
+                  <option>Diagonal</option>
+                  <option>SquareDrop </option>
+                  <option>Circular Droplet</option>
+                  <option>3 Connected Beads</option>
+                  <option>5 Bead Network</option>
+                  <option>Annulus (Donut)</option>
+                  <option>Grating</option>
+                  <option>Dots</option>
+                </select>
+              </div>
+            </td>
           </tr>
+
           <tr>
-            <td>Periodic Boundaries</td>
+            <td>
+              <div class="form-group row">
+                <label for="sizeSelect" class="col-sm-8 col-form-label">Size</label>
+                <div class="col-sm-4">
+                  <select id="sizeSelect" class="form-control form-control-sm" onchange = "resize()">
+                    <option selected="selected">3</option>
+                    <option>4</option>
+                    <option>5</option>
+                    <option>8</option>
+                    <option>10</option>
+                    <option>25</option>
+                    <option>40</option>
+                    <option>50</option>
+                    <option>75</option>
+                    <option>100</option>
+                    <option>200</option>
+                    <option>300</option>
+                    <option>600</option>
+                  </select>
+                </div>
+              </div>
+            </td>
           </tr>
+
           <tr>
-            <td>Show Fixed Spin</td>
+            <td>
+              <label for="boundarySelect">Boundaries</label>
+              <select id="boundarySelect" class="form-control form-control-sm" onchange = "changeBoundaries()">
+                <option selected="selected">Periodic Boundaries</option>
+                <option>Anti-periodic Boundaries (both directions)</option>
+                <option>Anti-periodic Boundaries (one direction)</option>
+                <option>Isolated Boundaries</option>
+                <option>Plus-Minus Boundaries (one direction)</option>
+                <option>Skewed Plus Minus Boundaries</option>
+                <option>Plus Boundaries (both directions)</option>
+                <option>Minus Boundaries (both directions)</option>
+                <option>Screw Periodic Boundaries</option>
+              </select>
+            </td>
           </tr>
+
           <tr>
-            <td>Local Magnetic Field</td>
+            <td>
+              <div class="form-group row">
+                <label for="showSpin" class="col-sm-8 col-form-label">Show Fixed Spin</label>
+                <div id="showSpin-checkbox-wrap" class="col-sm-4">
+                  <input type="checkbox" id="showSpin" class="form-check-input" onclick = "changeShowSpin()"/>
+                </div>
+              </div>
+            </td>
           </tr>
+
+          <tr>
+            <td>
+              <div class="form-group row">
+                <label for="SettleB" class="col-sm-8 col-form-label">Local Magnetic Field</label>
+                <div class="col-sm-4">
+                  <input type="number" id ="SettleB" class="form-control form-control-sm" value ="0.0" min ="-10.0" max ="10.0" onchange = "changeSettleB()"/>
+                </div>
+              </div>
+            </td>
+          </tr>
+
         </tbody>
       </table>
+
+      <input type="button" value="Randomize" id ="randomizeButton" onclick ="randomize()"/>
+      <input type="button" value="Align" id="alignButton" onclick ="makeAllOneColor()"/>
+      <input type="button" value="Start" id="startButton" onclick ="startStop()"/>
+
     </div>
 
     <!-- CONTENT -->
     <div id="main-div" class="content-wrapper">
+      
       <!-- CANVAS -->
-      <canvas></canvas>
+      <div id="canvas-wrapper">
+        <canvas id ="theCanvas" width ="600" height ="600"></canvas>
+      </div>
 
       <!-- DATA -->
       <div id="data-table-wrapper">
-        <table id="data-table" class="table table-primary table-striped">
+        <table id="data-table" class="table table-striped">
           <thead>
             <th>Data</th>
             <th></th>
@@ -95,38 +237,95 @@
           <tbody>
             <tr>
               <td>Steps</td>
-              <td>S#</td>
+              <td id="Steps">0</td>
             </tr>
             <tr>
               <td>Energy</td>
-              <td>E#</td>
+              <td id="Energy">0</td>
             </tr>
             <tr>
               <td>Average Energy</td>
-              <td>AE#</td>
+              <td id="Eav">0</td>
             </tr>
             <tr>
               <td>Sigma Energy</td>
-              <td>SE#</td>
+              <td id="SigmaE">0</td>
             </tr>
             <tr>
-              <td>Magnetism</td>
-              <td>M#</td>
+              <td>Magnetization</td>
+              <td id="M">0</td>
             </tr>
             <tr>
-              <td>Average Magnetism</td>
-              <td>AM#</td>
+              <td>Average Magnetization</td>
+              <td id="Mav">0</td>
             </tr>
             <tr>
               <td>Sigma Magnetism</td>
-              <td>SM#</td>
+              <td id="SigmaM">0</td>
+            </tr>
+            <tr>
+              <td>
+                <input type="button" class="btn btn-primary btn-sm" value="Reset Stats" onclick="resetData()"/>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
-
     </div>
+
+      <!-- NANOTUBE -->
+      <div id="nanotube-wrapper">
+        <p> <b> Nanotube Settings: </b></p>
+        <div>Thickness: <input type ="number" id ="nThicknessInput" value = "2" min ="0" max ="350"/> </div>
+        <div>Diameter: <input type ="number" id ="nDiameterInput" value = "15" min ="0" max ="498"/> </div>
+        <div>Height: <input type ="number" id ="nHeightInput" value ="50" min ="0" max ="500"/> </div>
+        <div>Spin: 
+          <select id = "nSpinSelect">
+            <option>Positive</option>
+            <option>Negative</option>
+          </select> </div>
+        <div class = "verticalSpace"> <input type="button" value="Create Nanotube" onclick = "makeNanotube()"/> </div>
+        <div> <p id = "molRatioReadout">Mole Ratio: .5 Up and .5 Down</p><input type ="range" min ="0" id ="molRatioSlider" onchange = "changeMolRatio()"/> </div>
+        <div class ="verticalSpace"><input type ="button" value ="Execute Mole Ratio" onclick ="execMolRatio()"/> </div>
+        <div><p id = "spfReadout"> Steps Per Frame: 10000</p> <input type ="range" min ="1" max ="7" value = "4" id = "spfSlider" onchange = "changeSpf()"/> </div>
+      </div>
+
+      <!-- SAVE / LOAD -->
+      <div class = "verticalSpace">
+          Filename to Save As: <input id="inputFileNameToSaveAs"/>
+          <input type ="button" value ="Save" onclick="saveTextAsFile()"/>
+      </div>
+
+      <div>
+          Select a file to load: <input type ="file" id ="fileToLoad" onclick = "enableOpen()"/>
+          <input type="button" value ="Open" onclick="loadFileAsText()" disabled id = "openButton"/>
+      </div>
+
+      <!-- GRAPH -->
+      <div>
+        <select id = "incrementGraphSelect">
+          <option>Incremental Increase</option>
+          <option>Incremental Decrease</option>
+        </select>
+        <select id = "typeGraphSelect">
+          <option>Temperature vs. Magnetization</option>
+          <option>Temperature vs. Energy</option>
+        </select>
+        <input type="button" value = "Graph" onclick ="startStopGraph()" id="graphButton" disabled/>
+          
+        <button id="exportChart">Download Graph</button>
+      </div>
+
+      <p id ="show" class ="verticalSpace"></p>
+
+      <div id="chartContainer" style="height: 500px; width:600px;" class ="center"> </div>
+
+    
+
+    <!-- SCRIPTS -->
+    <script type="text/javascript" src="js/all.js"></script>
+    <script type="text/javascript" src="js/script.js"></script>
+
   </div>
-  
 </body>
 </html>

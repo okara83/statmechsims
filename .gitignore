@@ -2,6 +2,8 @@
 *.code-workspace
 .vscode
 
-
 # Mac
 .DS_Store
+
+# Testing
+IsingModelIndex\ copy.html
