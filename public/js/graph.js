@@ -1,7 +1,7 @@
 /* ------------ */
 /* GRAPH        */
 /* ------------ */
-//live chart for temperature vs. magnetization and temperature vs. energy
+// live chart for temperature vs. magnetization and temperature vs. energy
 
 // default: no graph
 var graphOn = false;

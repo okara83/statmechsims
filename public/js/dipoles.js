@@ -1,6 +1,6 @@
-/* ---------------------------------- */
-/* DIPOLES FOR Metropolis & Kawasaki  */
-/* ---------------------------------- */
+/* -------------- */
+/* DIPOLES        */
+/* -------------- */
 // used by all algorithms
 // referenced by metropolis.js and kawasaki.js
 

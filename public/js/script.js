@@ -1,5 +1,8 @@
+// Instantiates all global variables, incl. DOM elements and calculation parameters
+// Handles all DOM functions (WIP -- moving from all.js to script.js)
+
 /* ------------------------ */
-/* DOM VARIABLES            */
+/* DOM ELEMENTS             */
 /* ------------------------ */
 //variables from html, organized by how they appear top to bottom, left to right on the webpage
 var canvas = document.getElementById("theCanvas");
@@ -29,7 +32,7 @@ var typeGraphSelect = document.getElementById("typeGraphSelect");
 
 
 /* ------------------------ */
-/* OUTPUT                   */
+/* CALC OUTPUT              */
 /* ------------------------ */
 // Displayed in DOM in Data Table
 // Default values
@@ -38,15 +41,14 @@ var StepsPerLoop = Math.pow(10, Number(spfSlider.value)); // this*innerLoopCount
 var Ecurrent = 0.0; //energy of current loops in algorithm
 var EsquaredTotal = 0.0; // declared to calculate sigmaE
 var Etotal = 0.0; //total energy, declared to calculate average energy
-
 var Mcurrent = 0.0; //magnetization of loop
 var MsquaredTotal = 0.0; //see EsquaredTotal
 var Mtotal = 0.0; //total magnetization, used in average
 
 
-/* -------------------------- */
-/* INPUT PARAMETERS   */
-/* -------------------------- */
+/* ---------------------------- */
+/* INPUT PARAMETERS & VARIABLES */
+/* ---------------------------- */
 
 // ALGORITHM
 // 0 - Metropolis (default)
@@ -64,7 +66,7 @@ var zeroT = false; //true when t = 0
 var Bfield = Number(BfieldInput.value);
 magnetSelect.selectedIndex = 0; //default: ferromagnetic
 var CouplingConstant;
-if(magnetSelect.value == "Ferromagnetic") {
+if (magnetSelect.value == "Ferromagnetic") {
     CouplingConstant = 1;
 } else {
     CouplingConstant = -1;
@@ -102,7 +104,6 @@ var SettleB = SettleBInput.value; //Dipole Settle Mode-what the square will flip
 // Metropolis is the hard-coded default within HTML
 let algorithmList = document.getElementById('algorithmDropdown').querySelectorAll('li');
 let algorithmButton = document.getElementById('algorithmBtn');
-
 
 
 /* ----- ALGORITHM DROPDOWN MENU ------ */

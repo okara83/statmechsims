@@ -66,141 +66,156 @@ __copyright__   = "Copyright 2017, College Park, MD"
     
     <!-- SIDEBAR: PARAMETERS -->
     <div id="param-sidebar" class="sidebar">
-      <table id="param-table" class="table">
-        <thead><th scope="col">Parameters</th></thead>
-        <tbody>
-          
-          <tr>
-            <td>
-              <div class="form-group row">
-                <label for="tempInput" class="col-sm-8 col-form-label">Temperature</label>
-                <div class="col-sm-4">
-                  <input id ="tempInput" class="form-control form-control-sm" type="number" step = "0.01" value ="2.27" min = "0.0" onchange = "changeT()"/>
+      <div id="param-sidebar-content">
+
+        <table id="param-table" class="table">
+          <thead><th scope="col">Parameters</th></thead>
+          <tbody>
+            
+            <tr>
+              <td>
+                <div class="form-group row metropolis kawasaki blume-capel">
+                  <label for="tempInput" class="col-sm-8 col-form-label">Temperature</label>
+                  <div class="col-sm-4">
+                    <input id ="tempInput" class="form-control form-control-sm" type="number" step = "0.01" value ="2.27" min = "0.0" onchange = "changeT()"/>
+                  </div>
                 </div>
-              </div>
-            </td>
-          </tr>
-
-          <tr>
-            <td>
-              <div class="form-group row">
-                <label for="BfieldInput" class="col-sm-8 col-form-label">Magnetic Field</label>
-                <div class="col-sm-4">
-                  <input id ="BfieldInput" class="form-control form-control-sm" type="number" step = "0.01" value ="0.0" onchange = "changeBfield()"/>
-                </div>  
-              </div>
-            </td>
-          </tr>
-
-          <tr>
-            <td>
-              <div class="form-group">
-                <label for="magnetSelect">Magnetism</label>
-                <select id ="magnetSelect" class="form-control form-control-sm" onchange = "changeMagnet()">
-                  <option selected="selected">Ferromagnetic</option>
-                  <option>Anti-Ferromagnetic</option>
-                  <option>Bipartite</option>
-                </select>
-              </div>
-            </td>
-          </tr>
-
-          <tr>
-            <td>
-              <div class="form-group">
-                <label for="patternSelect">Pattern</label>
-                <select id ="patternSelect" class="form-control form-control-sm" onchange = "MakePattern()">
-                <!-- <select id ="patternSelect" class="form-control form-control-sm"> -->
-                  <option selected="selected">Set Configuration</option>
-                  <option>Cross</option>
-                  <option>Thick X</option>
-                  <option>Thin X</option>
-                  <option>Horizontal</option>
-                  <option>Vertical</option>
-                  <option>Diagonal</option>
-                  <option>SquareDrop </option>
-                  <option>Circular Droplet</option>
-                  <option>3 Connected Beads</option>
-                  <option>5 Bead Network</option>
-                  <option>Annulus (Donut)</option>
-                  <option>Grating</option>
-                  <option>Dots</option>
-                </select>
-              </div>
-            </td>
-          </tr>
-
-          <tr>
-            <td>
-              <div class="form-group row">
-                <label for="sizeSelect" class="col-sm-8 col-form-label">Size</label>
-                <div class="col-sm-4">
-                  <select id="sizeSelect" class="form-control form-control-sm" onchange = "resize()">
-                    <option selected="selected">3</option>
-                    <option>4</option>
-                    <option>5</option>
-                    <option>8</option>
-                    <option>10</option>
-                    <option>25</option>
-                    <option>40</option>
-                    <option>50</option>
-                    <option>75</option>
-                    <option>100</option>
-                    <option>200</option>
-                    <option>300</option>
-                    <option>600</option>
+              </td>
+            </tr>
+  
+            <tr>
+              <td>
+                <div class="form-group row metropolis kawasaki blume-capel">
+                  <label for="BfieldInput" class="col-sm-8 col-form-label">Magnetic Field</label>
+                  <div class="col-sm-4">
+                    <input id ="BfieldInput" class="form-control form-control-sm" type="number" step = "0.01" value ="0.0" onchange = "changeBfield()"/>
+                  </div>  
+                </div>
+              </td>
+            </tr>
+  
+            <tr>
+              <td>
+                <div class="form-group metropolis kawasaki blume-capel">
+                  <label for="magnetSelect">Magnetism</label>
+                  <select id ="magnetSelect" class="form-control form-control-sm" onchange = "changeMagnet()">
+                    <option selected="selected">Ferromagnetic</option>
+                    <option>Anti-Ferromagnetic</option>
+                    <option>Bipartite</option>
                   </select>
                 </div>
-              </div>
-            </td>
-          </tr>
-
-          <tr>
-            <td>
-              <label for="boundarySelect">Boundaries</label>
-              <select id="boundarySelect" class="form-control form-control-sm" onchange = "changeBoundaries()">
-                <option selected="selected">Periodic Boundaries</option>
-                <option>Anti-periodic Boundaries (both directions)</option>
-                <option>Anti-periodic Boundaries (one direction)</option>
-                <option>Isolated Boundaries</option>
-                <option>Plus-Minus Boundaries (one direction)</option>
-                <option>Skewed Plus Minus Boundaries</option>
-                <option>Plus Boundaries (both directions)</option>
-                <option>Minus Boundaries (both directions)</option>
-                <option>Screw Periodic Boundaries</option>
-              </select>
-            </td>
-          </tr>
-
-          <tr>
-            <td>
-              <div class="form-group row">
-                <label for="showSpin" class="col-sm-8 col-form-label">Show Fixed Spin</label>
-                <div id="showSpin-checkbox-wrap" class="col-sm-4">
-                  <input type="checkbox" id="showSpin" class="form-check-input" onclick = "changeShowSpin()"/>
+              </td>
+            </tr>
+  
+            <tr>
+              <td>
+                <div class="form-group metropolis kawasaki">
+                  <label for="patternSelect">Pattern</label>
+                  <select id ="patternSelect" class="form-control form-control-sm" onchange = "MakePattern()">
+                  <!-- <select id ="patternSelect" class="form-control form-control-sm"> -->
+                    <option selected="selected">Set Configuration</option>
+                    <option>Cross</option>
+                    <option>Thick X</option>
+                    <option>Thin X</option>
+                    <option>Horizontal</option>
+                    <option>Vertical</option>
+                    <option>Diagonal</option>
+                    <option>SquareDrop </option>
+                    <option>Circular Droplet</option>
+                    <option>3 Connected Beads</option>
+                    <option>5 Bead Network</option>
+                    <option>Annulus (Donut)</option>
+                    <option>Grating</option>
+                    <option>Dots</option>
+                  </select>
                 </div>
-              </div>
-            </td>
-          </tr>
-
-          <tr>
-            <td>
-              <div class="form-group row">
-                <label for="SettleB" class="col-sm-8 col-form-label">Local Magnetic Field</label>
-                <div class="col-sm-4">
-                  <input type="number" id ="SettleB" class="form-control form-control-sm" value ="0.0" min ="-10.0" max ="10.0" onchange = "changeSettleB()"/>
+              </td>
+            </tr>
+  
+            <tr>
+              <td>
+                <div class="form-group row metropolis kawasaki blume-capel">
+                  <label for="sizeSelect" class="col-sm-8 col-form-label">Size</label>
+                  <div class="col-sm-4">
+                    <select id="sizeSelect" class="form-control form-control-sm" onchange = "resize()">
+                      <option selected="selected">3</option>
+                      <option>4</option>
+                      <option>5</option>
+                      <option>8</option>
+                      <option>10</option>
+                      <option>25</option>
+                      <option>40</option>
+                      <option>50</option>
+                      <option>75</option>
+                      <option>100</option>
+                      <option>200</option>
+                      <option>300</option>
+                      <option>600</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
-            </td>
-          </tr>
-
-        </tbody>
-      </table>
-
-      <input type="button" value="Randomize" id ="randomizeButton" onclick ="randomize()"/>
-      <input type="button" value="Align" id="alignButton" onclick ="makeAllOneColor()"/>
-      <input type="button" value="Start" id="startButton" onclick ="startStop()"/>
-
+              </td>
+            </tr>
+  
+            <tr>
+              <td>
+                <div class="form-group metropolis kawasaki">
+                  <label for="boundarySelect">Boundaries</label>
+                  <select id="boundarySelect" class="form-control form-control-sm" onchange = "changeBoundaries()">
+                    <option selected="selected">Periodic Boundaries</option>
+                    <option>Anti-periodic Boundaries (both directions)</option>
+                    <option>Anti-periodic Boundaries (one direction)</option>
+                    <option>Isolated Boundaries</option>
+                    <option>Plus-Minus Boundaries (one direction)</option>
+                    <option>Skewed Plus Minus Boundaries</option>
+                    <option>Plus Boundaries (both directions)</option>
+                    <option>Minus Boundaries (both directions)</option>
+                    <option>Screw Periodic Boundaries</option>
+                  </select>
+                </div>
+              </td>
+            </tr>
+  
+            <tr>
+              <td>
+                <div class="form-group row metropolis kawasaki">
+                  <label for="showSpin" class="col-sm-8 col-form-label">Show Fixed Spin</label>
+                  <div id="showSpin-checkbox-wrap" class="col-sm-4">
+                    <input type="checkbox" id="showSpin" class="form-check-input" onclick = "changeShowSpin()"/>
+                  </div>
+                </div>
+              </td>
+            </tr>
+  
+            <tr>
+              <td>
+                <div class="form-group row metropolis kawasaki blume-capel">
+                  <label for="SettleB" class="col-sm-8 col-form-label">Local Magnetic Field</label>
+                  <div class="col-sm-4">
+                    <input type="number" id ="SettleB" class="form-control form-control-sm" value ="0.0" min ="-10.0" max ="10.0" onchange = "changeSettleB()"/>
+                  </div>
+                </div>
+              </td>
+            </tr>
+  
+            <tr>
+              <td>
+                <div class="form-group metropolis kawasaki">
+                  <input type="button" value="Randomize" id ="randomizeButton" onclick ="randomize()"/>
+                  <input type="button" value="Align" id="alignButton" onclick ="makeAllOneColor()"/>
+                </div>
+              </td>
+            </tr>
+  
+          </tbody>
+        </table>
+        
+      </div>
+      
+      <div id="startButton-wrapper">
+        <input type="button" class="btn btn-success" value="Start Simulation" id="startButton" onclick ="startStop()"/>
+      </div>
+      
     </div>
 
     <!-- CONTENT -->
@@ -255,7 +270,7 @@ __copyright__   = "Copyright 2017, College Park, MD"
           </tbody>
         </table>
       </div>
-    </div>
+    
 
       <!-- NANOTUBE -->
       <div id="nanotube-wrapper">
@@ -304,7 +319,7 @@ __copyright__   = "Copyright 2017, College Park, MD"
 
       <div id="chartContainer" style="height: 500px; width:600px;" class ="center"> </div>
 
-    
+    </div>
       
       <!-- SCRIPTS -->
       <script type="text/javascript" src="js/script.js"></script>
@@ -312,7 +327,7 @@ __copyright__   = "Copyright 2017, College Park, MD"
       <script type="text/javascript" src="js/dipoles.js"></script>
       <script type="text/javascript" src="js/metropolis.js"></script>
       <script type="text/javascript" src="js/kawasaki.js"></script>
-      
+
       <script type="text/javascript" src="js/all.js"></script>
       <script type="text/javascript" src="js/patternSelect.js"></script>
       <script type="text/javascript" src="js/graph.js"></script>

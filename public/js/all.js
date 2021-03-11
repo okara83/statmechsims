@@ -19,18 +19,12 @@ for (var i = 0; i < Size; i++){
     for (var j = 0; j < Size; j++){
         if(Math.random() < 0.5)
             s[i][j] = 1;
-
         else
             s[i][j] = -1;
 
         colorSquare(i, j);
     }
 }
-
-//these will be defined when someone saves a configuration so that the user can easily go back to the initial saved configuration
-var initS;
-var initBfieldM;
-var initSettings;
 
 
 /* ------------------------ */
@@ -714,6 +708,11 @@ function makeAllOneColor(){
     resetData();
 }
 
+//these will be defined when someone saves a configuration so that the user can easily go back to the initial saved configuration
+var initS;
+var initBfieldM;
+var initSettings;
+
 //to return to initial SAVED configuration (only enabled after the "open" button is pressed)
 function restart(){ 
     for(var i = 0; i< Size; i++){
@@ -788,7 +787,7 @@ function startStop(){
 //everything below has to do with saving
 //basically creates a text files, converts all necessary data into strings then has the capability to essentially
 //recreate the lattice from an uploaded textfile
- 
+
 function saveTextAsFile() {
     var textToSave = makeSettingsString() + makeSpinArrayString() + "X"+ makeBfieldArrayString(); //"X" used as a divider between spin and Bfield array so it doesn't have to know how long each is
     var textToSaveAsBlob = new Blob([textToSave], {type:"text/plain"});
@@ -826,8 +825,7 @@ function loadFileAsText() {
     };
     fileReader.readAsText(fileToLoad, "UTF-8");
 }
- 
- 
+
 function recreateLattice(text){
     var settingsText = text.substring(0, text.indexOf("["));
     var sText = text.substring(text.indexOf("["), text.indexOf("X"));
