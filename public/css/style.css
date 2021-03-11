@@ -42,7 +42,7 @@ body {
   .sidebar {
     /* display: inline-block; */
     position: fixed;
-    max-width: 260px;
+    max-width: 300px;
     height: 100%;
     border-right: solid 1px lightgray;
     padding-top: 4em;
@@ -88,8 +88,6 @@ input[type=number]::-webkit-outer-spin-button {
   padding-left: calc(50% - 300px);
 }
 
-
-
 #canvas-wrapper {
   width: 600px;
   height: 600px;
@@ -97,11 +95,11 @@ input[type=number]::-webkit-outer-spin-button {
   display: inline-block;
 }
 
-
 #data-table-wrapper {
-  width: 220px;
+  margin-left: 10px;
+  width: 280px;
   height: 600px;
   display: inline-block;
   text-align: left;
-  background-color: lightgreen;
+  background-color: lightblue;
 }

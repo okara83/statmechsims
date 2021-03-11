@@ -70,28 +70,12 @@ __copyright__   = "Copyright 2017, College Park, MD"
         <thead><th scope="col">Parameters</th></thead>
         <tbody>
           
-          <!-- to be deprecated -->
-          <tr>
-            <td>
-              <div class="form-group">
-                <label for="algorithmSelect">Algorithm</label>
-                <select id = "algorithmSelect" onchange = "changeAlgorithm()">
-                  <option>Metropolis</option>
-                  <option>Kawasaki(non-local)</option>
-                  <option>Kawasaki(local)</option>
-                  <option>Blume-Emery-Griffiths</option>
-                  <option>Wolff</option>
-                </select>
-              </div>
-            </td>
-          </tr>
-
           <tr>
             <td>
               <div class="form-group row">
                 <label for="tempInput" class="col-sm-8 col-form-label">Temperature</label>
                 <div class="col-sm-4">
-                  <input class="form-control form-control-sm" type="number" id ="tempInput" step = "0.01" value ="2.27" onchange = "changeT()" min = "0.0"/>
+                  <input id ="tempInput" class="form-control form-control-sm" type="number" step = "0.01" value ="2.27" min = "0.0" onchange = "changeT()"/>
                 </div>
               </div>
             </td>
@@ -102,7 +86,7 @@ __copyright__   = "Copyright 2017, College Park, MD"
               <div class="form-group row">
                 <label for="BfieldInput" class="col-sm-8 col-form-label">Magnetic Field</label>
                 <div class="col-sm-4">
-                  <input class="form-control form-control-sm" type="number" id ="BfieldInput" step = "0.01" value ="0.0" onchange = "changeBfield()"/>
+                  <input id ="BfieldInput" class="form-control form-control-sm" type="number" step = "0.01" value ="0.0" onchange = "changeBfield()"/>
                 </div>  
               </div>
             </td>
@@ -321,13 +305,19 @@ __copyright__   = "Copyright 2017, College Park, MD"
       <div id="chartContainer" style="height: 500px; width:600px;" class ="center"> </div>
 
     
-
-    <!-- SCRIPTS -->
-    <script type="text/javascript" src="js/all.js"></script>
-    <script type="text/javascript" src="js/metropolis.js"></script>
-    <script type="text/javascript" src="js/kawasaki.js"></script>
-    <script type="text/javascript" src="js/script.js"></script>
-
+      
+      <!-- SCRIPTS -->
+      <script type="text/javascript" src="js/script.js"></script>
+      <!-- Algorithms -->
+      <script type="text/javascript" src="js/dipoles.js"></script>
+      <script type="text/javascript" src="js/metropolis.js"></script>
+      <script type="text/javascript" src="js/kawasaki.js"></script>
+      
+      <script type="text/javascript" src="js/all.js"></script>
+      <script type="text/javascript" src="js/patternSelect.js"></script>
+      <script type="text/javascript" src="js/graph.js"></script>
+      
+      
   </div>
 </body>
 </html>

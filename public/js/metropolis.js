@@ -1,6 +1,6 @@
-// Functions for Metropolis
+// All functions for METROPOLIS
 
-// The following variables can be found in all.js:
+// Variables defined in all.js:
 //  * var zeroT
 //  * var Ecurrent
 //  * var Mcurrent
@@ -11,8 +11,10 @@
 //  * var Bfield
 //  * var BfieldM
 
-// The following functions can be found in all.js:
+// Functions defined in all.js:
 //  * colorSquare
+
+// Functions defined in dipoles.js: 
 //  * getLeft
 //  * getRight
 //  * getTop
@@ -75,5 +77,20 @@ function deltaUforM(i, j){
     var thisS = s[i][j];
 
     return (2.0 * CouplingConstant * thisS * (top+bottom+left+right))+ (2.0 * thisS *(Bfield+BfieldM[i][j]));
+}
+
+//computes total energy from scratch when using the metropolis algorithm
+function ComputeEforMetropolis(){
+    Ecurrent = 0.0;
+    Mcurrent = 0.0;
+    for(var i=0; i<Size; i++){
+        for(var j=0; j<Size; j++){
+            var right = getRight(i,j);
+            var bottom = getBottom(i,j);
+            var thisS = s[i][j];
+            Ecurrent = Ecurrent - CouplingConstant*thisS*(right+bottom)-thisS*Bfield;
+            Mcurrent+= thisS;
+        }
+    }
 }
 

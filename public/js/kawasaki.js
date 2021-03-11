@@ -1,6 +1,6 @@
-// Functions for Kawasaki Non-Local and Kawasaki Local
+// All functions for KAWASAKI Non-Local and Local
 
-// The following variables can be found in all.js:
+// Variables defined in all.js:
 //  * var zeroT
 //  * var Ecurrent
 //  * var Mcurrent
@@ -11,8 +11,10 @@
 //  * var Bfield
 //  * var BfieldM
 
-// The following functions can be found in all.js:
+// Functions defined in all.js:
 //  * colorSquare
+
+// Functions defined in dipoles.js: 
 //  * getLeft
 //  * getRight
 //  * getTop
@@ -287,5 +289,22 @@ function deltaUforKawasakiforMLocal(i1, j1, i2, j2){
         return 2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) + 2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) + 4.0*CouplingConstant + 2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][j2]);
     } else {
         return 2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) + 2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) + 2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][j2]);
+    }
+}
+
+//computes total energy from scratch when using the kawasaki algorithm
+function ComputeEforKawasaki(){
+    Ecurrent = 0.0;
+    Mcurrent = 0.0;
+    for(var i=0; i<Size; i++){
+        for(var j=0; j<Size; j++){
+            var right = getRight(i,j);
+            var left = getLeft(i,j);
+            var top = getTop(i,j);
+            var bottom = getBottom(i,j);
+            var thisS = s[i][j];
+            Ecurrent = Ecurrent - .5*CouplingConstant*thisS*(right+left+top+bottom)-thisS*Bfield
+            Mcurrent += thisS;
+        }
     }
 }

@@ -1,5 +1,3 @@
-document.getElementById("patternSelect").addEventListener("change", MakePattern, false);
-
 function MakePattern(){
   switch (patternSelect.value) {
     case "Cross":
@@ -180,7 +178,6 @@ function MakeBeads(){
   }
 }
 
-
 function MakeNetworkBeads(){
   for(var i = 0; i < Size; i++){
     for(var j = 0; j < Size; j++){
@@ -219,7 +216,6 @@ function MakeCircle(){
     }
   }
 }
-
 
 function MakeDonut(){
   for(var i = 0; i < Size; i++){

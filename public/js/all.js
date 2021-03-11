@@ -1,103 +1,8 @@
-/* ------------------------ */
-/* DOM VARIABLES            */
-/* ------------------------ */
-//variables from html, organized by how they appear top to bottom, left to right on the webpage
-var canvas = document.getElementById("theCanvas");
-var context = canvas.getContext("2d");
-var nThicknessInput = document.getElementById("nThicknessInput");// n = nanotube
-var nDiameterInput = document.getElementById("nDiameterInput");
-var nHeightInput = document.getElementById("nHeightInput");
-var nSpinSelect = document.getElementById("nSpinSelect");
-var molRatioSlider = document.getElementById("molRatioSlider"); //mol = mole
-var molRatioReadout = document.getElementById("molRatioReadout");
-var spfReadout = document.getElementById("spfReadout");
-var spfSlider = document.getElementById("spfSlider");
-var tempInput = document.getElementById("tempInput");
-var BfieldInput = document.getElementById("BfieldInput");
-var magnetSelect = document.getElementById("magnetSelect");
-var sizeSelect = document.getElementById("sizeSelect");
-var algorithmSelect = document.getElementById("algorithmSelect");
-var boundarySelect = document.getElementById("boundarySelect");
-var showSpinCheck = document.getElementById("showSpin");
-var SettleBInput = document.getElementById("SettleB");
-var startButton = document.getElementById("startButton");
-var show = document.getElementById("show"); //for testing purposes
-var patternSelect = document.getElementById("patternSelect");
-var graphButton = document.getElementById("graphButton");
-var incrementGraphSelect = document.getElementById("incrementGraphSelect");
-var typeGraphSelect = document.getElementById("typeGraphSelect");
-
-
-/* ------------------------ */
-/* OUTPUT DATA              */
-/* ------------------------ */
-// Displayed in DOM in Data Table
-// Default values
-var InnerLoopCount = 0;
-var StepsPerLoop = Math.pow(10, Number(spfSlider.value)); // this*innerLoopCount rounded to the nearest hundredth = steps that are shown
-var Ecurrent = 0.0; //energy of current loops in algorithm
-var EsquaredTotal = 0.0; // declared to calculate sigmaE
-var Etotal = 0.0; //total energy, declared to calculate average energy
-
-var Mcurrent = 0.0; //magnetization of loop
-var MsquaredTotal = 0.0; //see EsquaredTotal
-var Mtotal = 0.0; //total magnetization, used in average
-
-
-/* ------------------------ */
-/* CALCULATION PARAMETERS   */
-/* ------------------------ */
-
-//inputs
-var T = Number(tempInput.value); //temperature
-var zeroT = false; //true when t = 0
-
-var Bfield = Number(BfieldInput.value); //magnetic field
-
-//initialize magnet options
-magnetSelect.selectedIndex = 0; //ferromagnetic is the default
-var CouplingConstant;
-if(magnetSelect.value == "Ferromagnetic")
-    CouplingConstant = 1;
-else
-    CouplingConstant = -1;
-
-
-//size
-sizeSelect.selectedIndex = 9; //default is 100
-var Size = Number(sizeSelect.options[sizeSelect.selectedIndex].text);  // dimensions of lattice
-var SquareWidth = canvas.width/Size; //size of each square determined by size of lattice
-var upRatio = 0.0; //for when you use the mol ratio creator slider/button, decimal of "up" spins
-changeMolRatioSettings();
-
-//algorithm
-algorithmSelect.selectedIndex = 0; //default is metropolis
-var algorithm = 0; //0 is metropolis, 1 is kawasaki nonlocal, and 2 is kawasaki local, selecting BEG or Wolff will take you to a different webpage
-
-
-//boundary conditions
-boundarySelect.selectedIndex = 0; //default is regular pbc
-var pbc = true;
-var ApbcBothDirections = false;
-var ApbcOneDirection = false;
-var FreeBound = false; //for isolated boundaries
-var screw = false;
-//for all boundary conditons below, they are really just pbc with fixed positive or negative edges
-var PlusMinus = false;
-var skewedPlusMinus = false;
-var plusBothDirections = false;
-var minusBothDirections = false;
-             
- 
-var showSpin = showSpinCheck.checked; // if true will show in a different color the squares that are manually changed
-
-s
-var SettleB = SettleBInput.value; //Dipole Settle Mode-what the square will flip to when it is clicked on
-
-var maxSize = canvas.width; //used in resize()
+/* -------------------------- */
+/* START                      */
+/* -------------------------- */
 var running = false; //true when running
 
-// initialize
 //sets local magnetic field of all dipoles to zero initially
 var BfieldM = new Array(Size);
 for (var i = 0; i < Size; i++){
@@ -106,7 +11,6 @@ for (var i = 0; i < Size; i++){
         BfieldM[i][j] = 0;
     }
 }
-
 
 //sets a random 2D array of dipoles and colors them accordingly
 var s = new Array(Size);
@@ -128,13 +32,13 @@ var initS;
 var initBfieldM;
 var initSettings;
 
-//for graph of temp vs. magnetization
-var graphOn = false;
-
 
 /* ------------------------ */
 /* START CALC               */
 /* ------------------------ */
+// honestly I have no idea where to put this
+changeMolRatioSettings();
+
 //computes current energy of original lattice before simulation begins (resetData() then resets the averages, not current energy)
 if (algorithm == 0){
     ComputeEforMetropolis();
@@ -164,78 +68,6 @@ function simulate(){
     }
     DisplayData();
     window.setTimeout(simulate, 1); //comes back in 1 millisecond
-}
-
-/* ---------------------------------- */
-/* DIPOLES FOR Metropolis & Kawasaki  */
-/* ---------------------------------- */
-//returns the dipole to the left of s[i][j] taking into account boundary conditions
-function getLeft(i, j){
-    if (j == 0) {
-        if(pbc) //or any other boundary condition not listed here:
-            return s[i][Size -1];
-
-        else if(ApbcBothDirections)
-            return -s[i][Size -1];
-
-        else if (ApbcOneDirection)
-            return -s[i][Size -1];
-
-        else if(FreeBound)
-            return 0;
-
-    } else {
-        return s[i][j-1];
-    }
-}
- 
- //returns the dipole to the right of s[i][j] taking into account boundary conditions
-function getRight(i, j){
-    if (j == Size-1) {
-        if(pbc)
-            return s[i][0];
-        else if (ApbcBothDirections)
-            return -s[i][0];
-        else if (ApbcOneDirection)
-            return -s[i][0];
-        else if (FreeBound)
-            return 0;
-    }
-    else
-        return s[i][j+1];
-}
-
-//dipole above s[i][j] with boundary conditions
-function getTop(i, j){
-    if (i==0)
-    {
-        if(pbc)
-            return s[Size-1][j];
-        else if (ApbcBothDirections)
-            return -s[Size-1][j];
-        else if (ApbcOneDirection)
-            return s[Size-1][j];
-        else if (FreeBound)
-            return 0;
-    }
-    else
-        return s[i-1][j];
-}
-
-//dipole below with boundary conditions
-function getBottom(i,j){
-    if (i==Size-1){
-        if(pbc)
-            return s[0][j];
-        else if (ApbcBothDirections)
-            return -s[0][j];
-        else if (ApbcOneDirection)
-            return s[0][j];
-        else if (FreeBound)
-            return 0;
-    }
-    else
-        return s[i+1][j];
 }
 
 
@@ -283,38 +115,6 @@ function DisplayData(){
     document.getElementById(dataNames[0]).innerHTML = data[0]; //because number of steps is the only data that doesn't have to be divided by sizeSquared
     for(var i = 1; i < data.length; i++){ //starts at "Energy", looping through the two arrays saves space
         document.getElementById(dataNames[i]).innerHTML = (data[i]/sizeSquared).toFixed(3);
-    }
-}
-
-//computes total energy from scratch when using the metropolis algorithm
-function ComputeEforMetropolis(){
-    Ecurrent = 0.0;
-    Mcurrent = 0.0;
-    for(var i=0; i<Size; i++){
-        for(var j=0; j<Size; j++){
-            var right = getRight(i,j);
-            var bottom = getBottom(i,j);
-            var thisS = s[i][j];
-            Ecurrent = Ecurrent - CouplingConstant*thisS*(right+bottom)-thisS*Bfield;
-            Mcurrent+= thisS;
-        }
-    }
-}
-
-//computes total energy from scratch when using the kawasaki algorithm
-function ComputeEforKawasaki(){
-    Ecurrent = 0.0;
-    Mcurrent = 0.0;
-    for(var i=0; i<Size; i++){
-        for(var j=0; j<Size; j++){
-            var right = getRight(i,j);
-            var left = getLeft(i,j);
-            var top = getTop(i,j);
-            var bottom = getBottom(i,j);
-            var thisS = s[i][j];
-            Ecurrent = Ecurrent - .5*CouplingConstant*thisS*(right+left+top+bottom)-thisS*Bfield
-            Mcurrent += thisS;
-        }
     }
 }
  
@@ -449,262 +249,9 @@ function resetData(){
     DisplayData();
 }
  
- 
-function MakePattern(){
-    if (patternSelect.value == "Thick X"){
-        return MakeFatX();
-    }
-    if (patternSelect.value == "Thin X"){
-        return MakeThinX();
-    }
-    if (patternSelect.value == "Cross"){
-        return MakeCross();
-    }
-    if (patternSelect.value == "Horizontal"){
-        return MakeHorizontal();
-    }
-    if (patternSelect.value == "Vertical"){
-        return MakeVertical();
-    }
-    if (patternSelect.value == "SquareDrop"){
-        return MakeSquare();
-    }
-    if (patternSelect.value == "3 Connected Beads"){
-        return MakeBeads();
-    }
-    if (patternSelect.value == "5 Bead Network"){
-        return MakeNetworkBeads();
-    }
-    if (patternSelect.value == "Diagonal"){
-        return MakeDiagonal();
-    }
-    if (patternSelect.value == "Circular Droplet"){
-        return MakeCircle();
-    }
-    if (patternSelect.value == "Annulus (Donut)"){
-        return MakeDonut();
-    }
-    if (patternSelect.value == "Grating"){
-        return MakeGrating();
-    }
-    if (patternSelect.value == "Dots"){
-        return MakeDots();
-    }
-}
- 
- 
- 
- 
-function MakeSquare(){
-    for(var i = 0; i < Size; i++){
-        for(var j = 0; j < Size; j++){
-            if( Math.abs((Size/2)-i)<Size*0.1 &&  Math.abs((Size/2)-j)<Size*0.1 ){
-                s[i][j] = 1;
-            }
-            else{
-                s[i][j] = -1;
-            }
-            colorSquare(i, j);
-        }
-    }
-}
- 
- 
-function MakeGrating(){
-    for(var i = 0; i < Size; i++){
-        for(var j = 0; j < Size; j++){
-            s[i][j] = 1;
-            colorSquare(i, j);
-        }
-    }
- 
-    for(var m = 0; m < Size; m++){
-        var c = 0;
-        for(var n = 0; n < Size; n+=3){
-            var g = n+c
-            var fa = m+c
-            s[fa][g] = -1;
-            colorSquare(fa, g);
-        }
-        c +=5;
-    }
-}
- 
- 
-function MakeDots(){
-    for(var i = 0; i < Size; i++){
-        for(var j = 0; j < Size; j++){
-            s[i][j] = 1;
-            colorSquare(i, j);
-        }
-    }
-
-    var c = 0;
-    for(var m = 0; m < Size; m++){
-        for(var n = 0; n < Size; n+=2){
-            var g = n+c
-            var fa = m+c
-            s[fa][g] = -1;
-            colorSquare(fa, g);
-        }
-        c++;
-    }
-}
- 
- 
- 
- 
- 
-function MakeFatX(){
-
-    for(var i = 0; i < Size; i++){
-        for(var j = 0; j < Size; j++){
-            if(i==j || i==Size-j-1 || i==j-1 || i==Size-j || i==j+1 || i==Size-j+1 || i==j+2 || i==Size-j+2 || i==j+3 || i==Size-j+3 || i==j+4 || i==Size-j+4  || i==j+5 || i==Size-j+5  || i==j+6 || i==Size-j+6  || i==j+7|| i==Size-j+7 || i==j+8|| i==Size-j+8 || i==j+9|| i==Size-j+9 || i==j+10|| i==Size-j+10){
-                s[i][j] = 1;
-            }
-            else{
-                s[i][j] = -1;
-            }
-            colorSquare(i, j);
-        }
-    }
-}
- 
-function MakeThinX(){
-    for(var i = 0; i < Size; i++){
-        for(var j = 0; j < Size; j++){
-            if(i==j || i==Size-j-1){
-                s[i][j] = 1;
-            }
-            else{
-                s[i][j] = -1;
-            }
-            colorSquare(i, j);
-        }
-    }
-}
- 
-function MakeCross(){
-    for(var i = 0; i < Size; i++){
-        for(var j = 0; j < Size; j++){
-            if(i==(Size/2) -1 || j==(Size/2) -1 || i==(Size/2) || j==(Size/2) || i==(Size/2) -2 || j==(Size/2) -2 || i==(Size/2) +1 || j==(Size/2) +1|| i==(Size/2) +2 || j==(Size/2) +2 ){
-                s[i][j] = 1;
-            }
-            else{
-                s[i][j] = -1;
-            }
-            colorSquare(i, j);
-        }
-    }
-}
- 
- 
-function MakeHorizontal(){
-    for(var i = 0; i < Size; i++){
-        for(var j = 0; j < Size; j++){
-            if(Math.abs((Size/2)-i)<Size*0.1){
-                s[i][j] = 1;
-            }
-            else{
-                s[i][j] = -1;
-            }
-            colorSquare(i, j);
-        }
-    }
-}
- 
-function MakeVertical(){
-    for(var i = 0; i < Size; i++){
-        for(var j = 0; j < Size; j++){
-            if(Math.abs((Size/2)-j)<Size*0.1){
-                s[i][j] = 1;
-            }
-            else{
-                s[i][j] = -1;
-            }
-            colorSquare(i, j);
-        }
-    }
-}
- 
- 
- 
-function MakeBeads(){
-    for(var i = 0; i < Size; i++){
-        for(var j = 0; j < Size; j++){
-            if( Math.sqrt( ( Size/2 - (j*3 - Size*.15) )**2 + (Size/2 - (i*3 -Size*.15))**2 ) < (Size/2)  || Math.sqrt( ( Size/2 - (j*3 - Size*1.9))**2 + (Size/2 - (i*3 - Size*1.9)  )**2 ) < Size/2 || Math.sqrt( ( Size/2 - (j*3 - Size*1.02))**2 + (Size/2 - (i*3 - Size*1.02)  )**2 ) < Size/2 || i==j || i==j-1 || i==j+1 || i==j+2 || i==j-2 || i==j+3 || i==j-3 ){
-                s[i][j] = 1;
-            }
-            else{
-                s[i][j] = -1;
-            }
-            colorSquare(i, j);
-        }
-    }
-}
-
- 
-function MakeNetworkBeads(){
-    for(var i = 0; i < Size; i++){
-        for(var j = 0; j < Size; j++){
-            if( Math.sqrt( ( Size/2 - (j*3 - Size*.15) )**2 + (Size/2 - (i*3 -Size*.15))**2 ) < (Size/2)  || Math.sqrt( ( Size/2 - (j*3 - Size*1.9))**2 + (Size/2 - (i*3 - Size*1.9)  )**2 ) < Size/2 || Math.sqrt( ( Size/2 - (j*3 - Size*1.02))**2 + (Size/2 - (i*3 - Size*1.02)  )**2 ) < Size/2 || i==j || i==j-1 || i==j+1 || i==j+2 || i==j-2 || i==j+3 || i==j-3 || Math.sqrt( ( Size/2 - (j*3))**2 + (Size/2 - (i*3 - Size*1.9)  )**2 ) < Size/2 ||Math.sqrt( ( Size/2 - (i*3 - Size*.1) )**2 + (Size*2.5 - j*3 - 5)**2 ) < (Size/2) || i==Size-j-1 || i==j-1 || i==Size-j || i==Size-j-2 || i==Size-j+2  || i==Size-j+1 || i==Size-j+3 || i==Size-j-3 ){
-                s[i][j] = 1;
-            }
-            else{
-                s[i][j] = -1;
-            }
-            colorSquare(i, j);
-        }
-    }
-}
- 
- 
- 
-function MakeDiagonal(){
-    for(var i = 0; i < Size; i++){
-        for(var j = 0; j < Size; j++){
-            if(i==j || i==j-1 || i==j+1){
-                s[i][j] = 1;
-            }
-            else{
-                s[i][j] = -1;
-            }
-            colorSquare(i, j);
-        }
-    }
-}
- 
-function MakeCircle(){
-    for(var i = 0; i < Size; i++){
-        for(var j = 0; j < Size; j++){
-            if( Math.sqrt( ( Size/2 - (j*3 - Size))**2 + (Size/2 - (i*3 - Size)  )**2 ) < Size/2){
-                s[i][j] = 1;
-            }
-            else{
-                s[i][j] = -1;
-            }
-            colorSquare(i, j);
-        }
-    }
-
-}
- 
- 
-function MakeDonut(){
-    for(var i = 0; i < Size; i++){
-        for(var j = 0; j < Size; j++){
-            if( (Math.sqrt( ( Size/2 - (j*3 - Size))**2 + (Size/2 - (i*3 - Size)  )**2 ) < Size/2) &&  (Math.sqrt( ( Size/2 - (j*6 - Size*2.5))**2 + (Size/2 - (i*6 - Size*2.5)  )**2 ) > Size/2)  ){
-                s[i][j] = 1;
-            }
-            else{
-                s[i][j] = -1;
-            }
-            colorSquare(i, j);
-        }
-    }
-}
- 
-/* --- NANOTUBES --- */
+/* ---------------------- */
+/* NANOTUBES              */
+/* ---------------------- */
 
 //makes a nanotube of set spins shown in dark yellow or blue
 function makeNanotube(){
@@ -908,23 +455,6 @@ function resize() {
     changeNanotubeSettings();
     changeMolRatioSettings();
 }
- 
- 
- 
- 
- 
-function changeAlgorithm(){
-    if(algorithmSelect.selectedIndex < 3){//if the algorithm is either metropolis or either kawasaki local or nonlocal
-        algorithm = algorithmSelect.selectedIndex
-    }
-    else if (algorithmSelect.selectedIndex == 3){
-        location.href = "BEG.html";
-    }
-    else{
-        location.href = "wolff.html";
-    }
-}
-
 
 function changeBoundaries(){
     pbc = false;
@@ -1250,14 +780,14 @@ function startStop(){
         startButton.value = " Start ";
         graphButton.disabled = true;
     }
-
 }
 
-
+/* ------------------------ */
+/* SAVE / READ FILE         */
+/* ------------------------ */
 //everything below has to do with saving
 //basically creates a text files, converts all necessary data into strings then has the capability to essentially
 //recreate the lattice from an uploaded textfile
-
  
 function saveTextAsFile() {
     var textToSave = makeSettingsString() + makeSpinArrayString() + "X"+ makeBfieldArrayString(); //"X" used as a divider between spin and Bfield array so it doesn't have to know how long each is
@@ -1397,164 +927,4 @@ function changeSettings(settings){
     Mcurrent = settings[10];
     MsquaredTotal = settings[11];
     DisplayData();
-}
-
-/* ------------ */
-/* GRAPH        */
-/* ------------ */
-
-//live chart for temperature vs. magnetization and temperature vs. energy
-var graphInterval;
-
-function startStopGraph(){
-    graphOn = !graphOn
-    if(graphOn){
-        graphButton.value = "Stop Graph";
-        typeGraphSelect.disabled = true;
-        incrementGraphSelect.disabled = true;
-        if(typeGraphSelect.selectedIndex == 0){
-            graphM();
-        }
-        else {
-            graphE();
-        }
-    }
-    if(!graphOn){
-        graphButton.value = "Graph"
-        clearInterval(graphInterval); //stops current live graph
-        typeGraphSelect.disabled = false;
-    }
-}
- 
- 
-function graphM() { //graphs temp vs magnetization
-    var dps = [];   //dataPoints.
-
-    var chart = new CanvasJS.Chart("chartContainer",{
-        title: {
-            text: "Temperature vs. Magnetization"
-        },
-        axisX: {
-            title: "Temperature"
-        },
-        axisY: {
-            title: "Magnetization"
-        },
-        data: [{
-            type: "scatter",
-            color: "#ff0000",
-            dataPoints : dps
-        }]
-    });
-
-    chart.render();
-    document.getElementById("exportChart").addEventListener("click",function(){
-        chart.exportChart({format: "jpg"})
-    }); 
-    
-    var updateInterval = 500; //updates every 0.5 seconds
-
-    var updateChart = function () {
-        if(incrementGraphSelect.selectedIndex == 0){ //if incremental increase is selected temperature will increase
-            if(tempInput.value >= 2.0 && tempInput.value <= 2.5){
-                dps.push({x: T,y: (Mcurrent/(Size*Size))}); //x value is temperature and y value is average magnetization
-                tempInput.value = (Number(tempInput.value) +.015).toFixed(2);
-            }
-            else if(tempInput.value >= 4.0){
-                tempInput.value = "0";
-            }
-            else{
-                dps.push({x: T,y: (Mcurrent/(Size*Size))}); //x value is temperature and y value is average magnetization
-                tempInput.value = (Number(tempInput.value) +.05).toFixed(2);
-            }
-        }
-        else{ //else it will decrease
-            if(tempInput.value >= 2.0 && tempInput.value <= 2.5){
-                dps.push({x: T,y: (Mcurrent/(Size*Size))}); //x value is temperature and y value is average magnetization
-                tempInput.value = (Number(tempInput.value) - .015).toFixed(2);
-            }
-            else if(tempInput.value >= 0){
-                tempInput.value = "4";
-            }
-            else{
-                dps.push({x: T,y: (Mcurrent/(Size*Size))}); //x value is temperature and y value is average magnetization
-                tempInput.value = (Number(tempInput.value) -.05).toFixed(2);
-            }
-        }
-        changeT();
-        chart.render();
-    };
-
-    // generates first set of dataPoints
-    updateChart();
-    graphInterval = setInterval(function(){updateChart()}, updateInterval);
-}
- 
-function graphE() { //graphs temp vs. energy
-    var dps = [];   //dataPoints.
-
-    var chart = new CanvasJS.Chart("chartContainer",{
-        title :{
-            text: "Temperature vs. Energy"
-        },
-        axisX: {
-            title: "Temperature"
-        },
-        axisY: {
-            title: "Energy"
-        },
-        data: [{
-            type: "scatter",
-            color: "#ff0000",
-            dataPoints : dps
-        }]
-    });
-
-    chart.render();
-    document.getElementById("exportChart").addEventListener("click",function(){
-        chart.exportChart({format: "jpg"});
-    }); 
-
-    document.getElementById("exportChart").addEventListener("click",function(){
-        chart.exportChart({format: "jpg"});
-    }); 
-
-
-    var updateInterval = 500; //updates every 0.5 seconds
-
-    var updateChart = function () {
-        if(incrementGraphSelect.selectedIndex == 0){ //if incremental increase is selected temperature will increase
-            if(tempInput.value >= 2.0 && tempInput.value <= 2.5){
-                dps.push({x: T,y: (Ecurrent/(Size*Size))}); //x value is temperature and y value is average magnetization
-                tempInput.value = (Number(tempInput.value) +.015).toFixed(2);
-            }
-            else if(tempInput.value >= 4.0){
-                tempInput.value = "0";
-            }
-            else{
-                dps.push({x: T,y: (Ecurrent/(Size*Size))}); //x value is temperature and y value is average magnetization
-                tempInput.value = (Number(tempInput.value) +.05).toFixed(2);
-            }
-        }
-        else{ //else it will decrease
-            if(tempInput.value >= 2.0 && tempInput.value <= 2.5){
-                dps.push({x: T,y: (Ecurrent/(Size*Size))}); //x value is temperature and y value is average magnetization
-                tempInput.value = (Number(tempInput.value) - .015).toFixed(2);
-            }
-            else if(tempInput.value >= 0){
-                tempInput.value = "4";
-            }
-            else{
-                dps.push({x: T,y: (Ecurrent/(Size*Size))}); //x value is temperature and y value is average magnetization
-                tempInput.value = (Number(tempInput.value) -.05).toFixed(2);
-            }
-        }
-        changeT();
-        chart.render();
-    };
-
-    // generates first set of dataPoints
-    updateChart();
-
-    graphInterval = setInterval(function(){updateChart()}, updateInterval);
 }
