@@ -1,4 +1,5 @@
-// All functions for METROPOLIS
+// All functions for METROPOLIS algorithm
+// Original code can be found in IsingModelIndex.html
 
 // Variables defined in all.js:
 //  * var zeroT
@@ -36,7 +37,7 @@ function Metropolis() {
         thisS = s[i][j]; // does this need to be declared here?
         var _Ediff = deltaU(i,j);
         var _EdiffforM = deltaUforM(i,j);
-        if (zeroT){ //to avoid dividing by zero
+        if (zeroT){ // global closure; to avoid dividing by zero
             if((_EdiffforM < 0.0) || ((_EdiffforM == 0) && (Math.random() < .5))){ //always flip if deltaU is negative or if deltaU is 0 then flip randomly
                 thisS *= -1;
                 s[i][j] = thisS;

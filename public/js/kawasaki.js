@@ -1,4 +1,5 @@
-// All functions for KAWASAKI Non-Local and Local
+// All functions for KAWASAKI Non-Local and Local algorithms
+// Original code can be found in IsingModelIndex.html
 
 // Variables defined in all.js:
 //  * var zeroT

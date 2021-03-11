@@ -19,7 +19,7 @@ var tempInput = document.getElementById("tempInput");
 var BfieldInput = document.getElementById("BfieldInput");
 var magnetSelect = document.getElementById("magnetSelect");
 var sizeSelect = document.getElementById("sizeSelect");
-var algorithmSelect = document.getElementById("algorithmSelect");
+// var algorithmSelect = document.getElementById("algorithmSelect"); // deprecated
 var boundarySelect = document.getElementById("boundarySelect");
 var showSpinCheck = document.getElementById("showSpin");
 var SettleBInput = document.getElementById("SettleB");
@@ -29,6 +29,8 @@ var patternSelect = document.getElementById("patternSelect");
 var graphButton = document.getElementById("graphButton");
 var incrementGraphSelect = document.getElementById("incrementGraphSelect");
 var typeGraphSelect = document.getElementById("typeGraphSelect");
+let algorithmList = document.getElementById('algorithmDropdown').querySelectorAll('li');
+let algorithmButton = document.getElementById('algorithmBtn');
 
 
 /* ------------------------ */
@@ -54,9 +56,30 @@ var Mtotal = 0.0; //total magnetization, used in average
 // 0 - Metropolis (default)
 // 1 - Kawasaki Non-Local
 // 2 - Kawasaki Local
-// 3 - BEG (not combined yet)
-// 4 - Wolff (not combined yet)
-var algorithm = 0; 
+// 3 - BEG (not combined yet as of 3/11/21)
+// 4 - Wolff (not combined yet as of 3/11/21)
+var algorithm = 0; // closure for active algorithm
+
+// Add Event Handlers to all dropdown elements in the Algorithm Dropdown
+for (let i = 0; i < algorithmList.length; i++) {
+    // add event listener: click dropdown
+    algorithmList[i].addEventListener('click', function() {
+
+        // add 'active' to current element, remove from all others
+        for (let j = 0; j < algorithmList.length; j++) {
+            if (j == i) {
+                if (i != algorithm) { // only do something if changing algorithms
+                    algorithmList[j].firstChild.classList.add('active'); // change active element
+                    algorithmButton.innerHTML = algorithmList[j].firstChild.textContent; // change dropdown button text to reflect active algorithm
+                    algorithm = i;
+                    initialize(i); // currently only prints the name of the selected algorithm to the console
+                }
+            } else { 
+                algorithmList[j].firstChild.classList.remove('active');
+            }
+        }
+    })
+}
 
 // TEMPERATURE
 var T = Number(tempInput.value);
@@ -101,58 +124,33 @@ var showSpin = showSpinCheck.checked; //if true will show in a different color t
 // LOCAL MAGNETIC FIELD
 var SettleB = SettleBInput.value; //Dipole Settle Mode-what the square will flip to when it is clicked on
 
-// Metropolis is the hard-coded default within HTML
-let algorithmList = document.getElementById('algorithmDropdown').querySelectorAll('li');
-let algorithmButton = document.getElementById('algorithmBtn');
-
-
-/* ----- ALGORITHM DROPDOWN MENU ------ */
-for (let i = 0; i < algorithmList.length; i++) {
-    // add event listener: click dropdown
-    algorithmList[i].addEventListener('click', function() {
-
-        // add 'active' to current element, remove from all others
-        for (let j = 0; j < algorithmList.length; j++) {
-            if (j == i) {
-                if (i != algorithm) { // only do something if changing algorithms
-                    algorithmList[j].firstChild.classList.add('active'); // change active element
-                    algorithmButton.innerHTML = algorithmList[j].firstChild.textContent; // change dropdown button text to reflect active algorithm
-                    algorithm = i;
-                    initialize(i);
-                }
-            } else { 
-                algorithmList[j].firstChild.classList.remove('active');
-            }
-        }
-    })
-}
-
 
 /* ------------------------ */
 /* INITIALIZE ALGORITHM     */
 /* ------------------------ */
+// I have ambitions this can eventually replace simulate() in all.js
 
-function initialize(algorithm) { // eventually this will do more things
-    console.log(algorithm)
+function initialize(algorithm) { 
+    console.log(algorithm); // prints numerical representation of active algorithm
     switch (algorithm) {
         case 0: // Metropolis
-            console.log('Metropolis')
+            console.log('Metropolis');
             break;
 
         case 1: // Kawasaki (local)
-            console.log('Kawasaki (local')
+            console.log('Kawasaki (non-local');
             break;
 
         case 2: // Kawasaki (non-local)
-            console.log('Kawasaki (non-local')
+            console.log('Kawasaki (local)');
             break;
 
         case 3: // Blume-Capel
-            console.log('Blume-Capel')
+            console.log('Blume-Capel');
             break;
 
         case 4: // Wolff
-            console.log('Wolff')
+            console.log('Wolff');
             break;
     }
 }

@@ -95,7 +95,7 @@ function graphE() { //graphs temp vs. energy
     var dps = [];   //dataPoints.
 
     var chart = new CanvasJS.Chart("chartContainer",{
-        title :{
+        title: {
             text: "Temperature vs. Energy"
         },
         axisX: {

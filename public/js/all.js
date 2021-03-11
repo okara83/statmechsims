@@ -1,7 +1,13 @@
+// This file containes the skeleton of calculation logic. 
+// The specific calculations are contained in their respective algorithm JS file, e.g. metropolis.js
+// It also contains most event handlers for HTML inputs. These can probably be split out into a separate document.
+// patternSelect.js and graph.js have already been split out to simplify this file. 
+// This file is named 'all.js' because it used to contain everything until I began splitting them out. 
+
 /* -------------------------- */
-/* START                      */
+/* SET UP CALCULAIONS         */
 /* -------------------------- */
-var running = false; //true when running
+var running = false; // boolean closure for algorithms
 
 //sets local magnetic field of all dipoles to zero initially
 var BfieldM = new Array(Size);
@@ -26,36 +32,70 @@ for (var i = 0; i < Size; i++){
     }
 }
 
-
 /* ------------------------ */
-/* START CALC               */
+/* START CALC!!!            */
 /* ------------------------ */
-// honestly I have no idea where to put this
+// honestly I have no idea where to put this but original source doc calls it before any other functions
 changeMolRatioSettings();
 
-//computes current energy of original lattice before simulation begins (resetData() then resets the averages, not current energy)
-if (algorithm == 0){
-    ComputeEforMetropolis();
-}
-else if (algorithm == 1){
-    ComputeEforKawasaki();
-}
-else{
-    ComputeEforKawasakiLocal();
-}
+// actually start the simulation
+//computes current energy Ecurrent and Mcurrent of original lattice before simulation begins (resetData() then resets the averages, not current energy)
+ComputeE();
 resetData();
-simulate();
- 
-// SIMULATE -- parses which alg to run
+simulate(); // begin simulation. uses the closure 'running' 
+
+
+/* ------------------------ */
+/* CALCULATION FUNCTIONS    */
+/* ------------------------ */
+
+// routes to appropriate function based on current algorithm
+// computes current energy Ecurrent and Mcurrent of original lattice
+function ComputeE() {
+    switch (algorithm) {
+        case 0: // Metropolis
+            ComputeEforMetropolis();
+            break;
+
+        case 1: // Kawasaki Non-Local
+            ComputeEforKawasaki();
+            break;
+
+        case 2: // Kawasaki Local
+            ComputeEforKawasakiLocal();
+            break;
+
+        case 3: // Blume-Capel -- WIP -- computes kawasaki local to preserve original behavior until further development
+            ComputeEforKawasakiLocal();
+            break;
+
+        case 4: // Wolff -- WIP -- computes kawasaki local to preserve original behavior until further development
+            ComputeEforKawasakiLocal();
+            break;
+    }
+}
+
+// resets tables (except for current energy (Ecurrent) and magnetization (Mcurrent))
+function resetData(){
+    InnerLoopCount = 0;
+    Etotal = 0;
+    EsquaredTotal = 0;
+    Mtotal = 0;
+    MsquaredTotal = 0;
+    DisplayData();
+}
+
+// SIMULATE -- runs the active algorithm. 
+// Each algorithm function writes the 2D lattice 's' and colors the canvas.
 function simulate(){
-    if(running){
-        if(algorithm == 0){
+    if (running){
+        if (algorithm == 0){
             Metropolis();
         }
-        else if(algorithm == 1){
+        else if (algorithm == 1){
             MetropolisforKawasaki();
         }
-        else {
+        else { // need to factor in Blume-Capel and Wolff
             MetropolisforKawasakiLocal();
         }
         Cumulate();
@@ -64,11 +104,8 @@ function simulate(){
     window.setTimeout(simulate, 1); //comes back in 1 millisecond
 }
 
-
-/* ------------------------ */
-/* CUMULATE                 */
-/* ------------------------ */
-//adds in stats of the current loop
+// adds in stats of the current loop
+// only used in simulate()
 function Cumulate(){
     Etotal += Ecurrent;
     EsquaredTotal += (Ecurrent*Ecurrent);
@@ -77,7 +114,7 @@ function Cumulate(){
 }
 
 /* ------------------------ */
-/* CALC & DISPLAY DATA      */
+/* DISPLAY DATA             */
 /* ------------------------ */
 var Mav; //so that it can be accessed in the temperature vs. magnetization plot
 //changes data display of energy and magnitization
@@ -229,24 +266,12 @@ function colorAllAndResetBfieldM(){
     }
 }
 
-/* ------------------------ */
-/* DOM BUTTONS              */
-/* ------------------------ */
-//these functions all have to do with the buttons in the html and are organized by their order of appearance from top to bottom, left to right
-//resets tables (except for current energy and magnetization)
-function resetData(){
-    InnerLoopCount = 0;
-    Etotal = 0;
-    EsquaredTotal = 0;
-    Mtotal = 0;
-    MsquaredTotal = 0;
-    DisplayData();
-}
- 
+
 /* ---------------------- */
-/* NANOTUBES              */
+/* EVENT HANDLERS         */
 /* ---------------------- */
 
+// NANOTUBES
 //makes a nanotube of set spins shown in dark yellow or blue
 function makeNanotube(){
     BfieldInput.value = 0;
@@ -283,13 +308,7 @@ function makeNanotube(){
         }
     }
 
-    if (algorithm == 0){
-        ComputeEforMetropolis();
-    } else if (algorithm = 1){
-        ComputeEforKawasaki();
-    } else{
-        ComputeEforKawasakiLocal();
-    }
+    ComputeE();
     resetData();
 }
  
@@ -301,7 +320,9 @@ function changeNanotubeSettings(){
         nThicknessInput.max = Math.floor(Size/2);
         nHeightInput.max = Size;
 }
- 
+
+
+// MOL RATIO
 function changeMolRatioSettings(){//also changes readout and slider value
     //ratios available depend on the size of the lattice so they can evenly divide into the size
     if(Size%4 == 0){
@@ -351,23 +372,19 @@ function execMolRatio(){//actually creates the mole ratio
             colorSquare(i,j);
         }
     }
-    if (algorithm == 0){
-        ComputeEforMetropolis();
-    }
-    else if (algorithm = 1){
-        ComputeEforKawasaki();
-    }
-    else{
-        ComputeEforKawasakiLocal();
-    }
+
+    ComputeE();
     resetData();
 }
  
+
+// STEPS PER FRAME
 function changeSpf(){
     StepsPerLoop = Math.pow(10, Number(spfSlider.value));
     spfReadout.innerHTML = " Steps Per Frame: " + StepsPerLoop;
 }
  
+// TEMPERATURE
 function changeT(){
     T = Number(tempInput.value);
     if(T==0)
@@ -376,10 +393,12 @@ function changeT(){
         zeroT = false;
 }
 
+// MAGNETIC FIELD
 function changeBfield(){
     Bfield = Number(BfieldInput.value);
 }
  
+// MAGNETISM
 function changeMagnet(){
     if(magnetSelect.selectedIndex == 0) //if it's ferromagnetic
         CouplingConstant = 1;
@@ -388,7 +407,7 @@ function changeMagnet(){
     colorAll(); //have to recolor all the squares if its been change from or to bipartite
 }
  
- 
+// SIZE
 //resizes lattice
 function resize() {
     // First up-sample the lattice into a temporary array at max resolution:
@@ -436,20 +455,12 @@ function resize() {
         }
     }
     resetData();
-
-    if (algorithm == 0){
-        ComputeEforMetropolis();
-    }
-    else if (algorithm = 1){
-        ComputeEforKawasaki();
-    }
-    else{
-        ComputeEforKawasakiLocal();
-    }
+    ComputeE();
     changeNanotubeSettings();
     changeMolRatioSettings();
 }
 
+// BOUNDARIES
 function changeBoundaries(){
     pbc = false;
     ApbcBothDirections = false;
@@ -582,31 +593,23 @@ function changeBoundaries(){
         }
     }
     
-
-    if (algorithm == 0){
-        ComputeEforMetropolis();
-    }
-    else if (algorithm = 1){
-        ComputeEforKawasaki();
-    }
-    else{
-        ComputeEforKawasakiLocal();
-    }
+    ComputeE();
     resetData();
 }
  
- 
+// SHOW SPIN
 function changeShowSpin(){
     showSpin = !showSpin;
     colorAll();
 }
- 
+
+// LOCAL MAGNETIC FIELD
 function changeSettleB(){
     SettleB = Number(SettleBInput.value);
 }
  
- 
- 
+// RANDOMIZE
+// for the Randomize button in Metropolis and Kawasaki
 function randomize(){ //doesn't change fixed boundary conditions
     var startX; //where the algorithm starts horizontally depends on the boundary condition (so we don't change the fixed spins in the skewed boundary conditions)
     var endX; //where it ends horizontally
@@ -646,20 +649,13 @@ function randomize(){ //doesn't change fixed boundary conditions
         }
     }
 
-
-    if (algorithm == 0){
-        ComputeEforMetropolis();
-    }
-    else if (algorithm = 1){
-        ComputeEforKawasaki();
-    }
-    else{
-        ComputeEforKawasakiLocal();
-    }
+    ComputeE();
     resetData();
 }
 
-//colors all squares opposite of a square in the middle of the lattice, used in "align" button (doesn't mess with fixed boundary conditions)
+// ALIGN
+// for the 'Align' button in Metropolis and Kawasaki
+// colors all squares opposite of a square in the middle of the lattice, used in "align" button (doesn't mess with fixed boundary conditions)
 function makeAllOneColor(){
     var startX; //where the algorithm starts horizontally depends on the boundary condition (so we don't change the fixed spins in the skewed boundary conditions)
     var endX; //where it ends horizontally
@@ -696,24 +692,35 @@ function makeAllOneColor(){
         }
     }
 
-    if (algorithm == 0){
-        ComputeEforMetropolis();
-    }
-    else if (algorithm = 1){
-        ComputeEforKawasaki();
-    }
-    else{
-        ComputeEforKawasakiLocal();
-    }
+    ComputeE();
     resetData();
 }
 
-//these will be defined when someone saves a configuration so that the user can easily go back to the initial saved configuration
+ 
+// START
+// for the Start Simulation button
+// toggles the boolean closure 'running' which all algorithms reference (see metropolis.js, kawasaki.js, etc)
+function startStop(){
+    running = !running;
+    if(running){
+        startButton.value = " Pause ";
+        graphButton.disabled = false; //So you can't start recording values when the simulation isn't running
+    }
+    else{
+        startButton.value = " Start ";
+        graphButton.disabled = true;
+    }
+}
+
+// RESTART
+// The below functions seem to have to do with a 'restart' button, but I don't see it in HMTL, nor are these used elsewhere
+
+// these will be defined when someone saves a configuration so that the user can easily go back to the initial saved configuration
 var initS;
 var initBfieldM;
 var initSettings;
 
-//to return to initial SAVED configuration (only enabled after the "open" button is pressed)
+// to return to initial SAVED configuration (only enabled after the "open" button is pressed)
 function restart(){ 
     for(var i = 0; i< Size; i++){
         for(var j = 0; j < Size; j++){
@@ -736,15 +743,7 @@ function restartFromAligned(){
     changeSettings(settings);
     makeAllOneColor();
 
-    if (algorithm == 0){
-        ComputeEforMetropolis();
-    }
-    else if (algorithm = 1){
-        ComputeEforKawasaki();
-    }
-    else{
-        ComputeEforKawasakiLocal();
-    }
+    ComputeE();
     resetData();
     startStop();
 }
@@ -754,39 +753,19 @@ function restartFromRandom(){
     changeSettings(settings);
     randomize();
 
-    if (algorithm == 0){
-        ComputeEforMetropolis();
-    }
-    else if (algorithm = 1){
-        ComputeEforKawasaki();
-    }
-    else{
-        ComputeEforKawasakiLocal();
-    }
+    ComputeE();
     resetData();
     startStop();
 }
- 
- 
-//used in start button
-function startStop(){
-    running = !running;
-    if(running){
-        startButton.value = " Pause ";
-        graphButton.disabled = false; //So you can't start recording values when the simulation isn't running
-    }
-    else{
-        startButton.value = " Start ";
-        graphButton.disabled = true;
-    }
-}
+
 
 /* ------------------------ */
 /* SAVE / READ FILE         */
 /* ------------------------ */
-//everything below has to do with saving
-//basically creates a text files, converts all necessary data into strings then has the capability to essentially
-//recreate the lattice from an uploaded textfile
+// TO DO: separate this into new document
+// everything below has to do with saving
+// basically creates a text files, converts all necessary data into strings then has the capability to essentially
+// recreate the lattice from an uploaded textfile
 
 function saveTextAsFile() {
     var textToSave = makeSettingsString() + makeSpinArrayString() + "X"+ makeBfieldArrayString(); //"X" used as a divider between spin and Bfield array so it doesn't have to know how long each is
