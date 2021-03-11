@@ -91,7 +91,7 @@ var minusBothDirections = false;
  
 var showSpin = showSpinCheck.checked; // if true will show in a different color the squares that are manually changed
 
-
+s
 var SettleB = SettleBInput.value; //Dipole Settle Mode-what the square will flip to when it is clicked on
 
 var maxSize = canvas.width; //used in resize()
@@ -106,7 +106,8 @@ for (var i = 0; i < Size; i++){
         BfieldM[i][j] = 0;
     }
 }
- 
+
+
 //sets a random 2D array of dipoles and colors them accordingly
 var s = new Array(Size);
 for (var i = 0; i < Size; i++){
@@ -138,7 +139,7 @@ var graphOn = false;
 if (algorithm == 0){
     ComputeEforMetropolis();
 }
-else if (algorithm = 1){
+else if (algorithm == 1){
     ComputeEforKawasaki();
 }
 else{
@@ -165,330 +166,8 @@ function simulate(){
     window.setTimeout(simulate, 1); //comes back in 1 millisecond
 }
 
-/* ------------------------ */
-/* METROPOLIS               */
-/* ------------------------ */
-// runs the metropolis algorithm and colors squares accordingly
-function Metropolis() {
-    for(var step = 0; step < StepsPerLoop; step++){
-        var i = Math.floor(Math.random()*Size);
-        var j = Math.floor(Math.random()*Size);
-        thisS = s[i][j];
-        var Ediff = deltaU(i,j);
-        var EdiffforM = deltaUforM(i,j);
-        if(zeroT){ //to avoid dividing by zero
-            if((EdiffforM < 0.0) || ((EdiffforM == 0) && (Math.random() < .5))){ //always flip if deltaU is negative or if deltaU is 0 then flip randomly
-                thisS *= -1;
-                s[i][j] = thisS;
-                colorSquare(i,j);
-                Ecurrent += Ediff;
-                Mcurrent += (2*thisS);
-            }
-            //if deltaU is positive then there is no flip when at absolute zero
-        }
-        else if((EdiffforM <= 0.0) || (Math.random() < Math.exp((-EdiffforM)/T))){
-            thisS *= -1;
-            s[i][j] = thisS;
-            colorSquare(i,j);
-            Ecurrent += Ediff;
-            Mcurrent += (2*thisS);
-
-        }
-    }
-    InnerLoopCount++;
-}
- 
-/* ----------------------------- */
-/* I have no idea what this does */
-/* ----------------------------- */
-nearestneighs = new Object();
-for (var m = 0; m < Size; m++){
-    for (var n = 0; n < Size; n++){
-        var pair = [];
-        var indexNeighs = [];
-        var ordered = [m,n];
-        for(var zz = 0; zz < 4; zz++){
-            if(zz==0){  //look up
-                if (m == 0){
-                    pair = [Size-1,n];
-                    indexNeighs.push(pair);
-                } else{
-                    pair = [m-1,n];
-                    indexNeighs.push(pair);
-                }
-            }
-
-            if(zz==1){   //look down
-                if (m == Size-1){
-                    pair = [0,n];
-                    indexNeighs.push(pair);
-                } else{
-                    pair = [m+1,n];
-                    indexNeighs.push(pair);
-                }
-            }
-
-            if(zz==2){    //look left
-                if (n == 0){
-                    pair = [m,Size-1];
-                    indexNeighs.push(pair);
-                    }
-                else{ pair = [m,n-1];
-                    indexNeighs.push(pair);
-                }
-            }
-            if(zz==3){ //look right
-                if (n == Size-1){
-                    pair = [m,0];
-                    indexNeighs.push(pair);
-                } else{
-                    pair = [m,n+1];
-                    indexNeighs.push(pair);
-                }
-            }
-            nearestneighs[[m,n]] = indexNeighs;
-        }
-    }
-}
-
-/* ------------------------ */
-/* KAWASAKI  LOCAL          */
-/* ------------------------ */
-function MetropolisforKawasakiLocal(){
-    for(var step = 0; step <StepsPerLoop; step++){
-        var i1 = Math.floor(Math.random()*Size);
-        var j1 = Math.floor(Math.random()*Size);
-        var dictkey = [i1, j1];
-        var tryit = nearestneighs[dictkey];
-        var randtry = tryit[Math.floor(Math.random()*4)];
-        var i2 = randtry[0];
-        var j2 = randtry[1];
-
-        if(s[i1][j1] != s[i2][j2]){
-            var thisS = s[i1][j1];
-            var thatS = s[i2][j2];
-            var EdiffforM = deltaUforKawasakiforM(i1, j1, i2, j2);
-            var Ediff = deltaUforKawasaki(i1, j1, i2, j2);
-            if(zeroT){ //to avoid dividing by zero
-                if((EdiffforM < 0.0) || ((EdiffforM == 0) && (Math.random() < .5))){ //always flip if deltaU is negative
-                    thisS *= -1;
-                    s[i1][j1] = thisS;
-                    thatS *= -1;
-                    s[i2][j2] = thatS;
-                    colorSquare(i1, j1);
-                    colorSquare(i2, j2);
-                    Ecurrent += Ediff;
-                    Mcurrent += ((2*thisS) + (2*thatS));
-                }
-            } else if ((EdiffforM <= 0.0) || (Math.random() < Math.exp((-EdiffforM)/T))){
-                thisS *= -1;
-                s[i1][j1] = thisS;
-                thatS *= -1;
-                s[i2][j2] = thatS;
-                colorSquare(i1, j1);
-                colorSquare(i2, j2);
-                Ecurrent += Ediff;
-                Mcurrent += ((2*thisS) + (2*thatS));
-            }
-        }
-    }
-    InnerLoopCount++;
-}
- 
-// energy change for kawaskai without local magnetic field
-function deltaUforKawasakiLocal(i1,j1, i2, j2){
-    var thisS = s[i1][j1];
-    var thatS = s[i2][j2];
-
-    var left1 = getLeft(i1,j1);
-    var right1 = getRight(i1,j1);
-    var top1 = getTop(i1,j1);
-    var bottom1 = getBottom(i1,j1);
-
-    var left2 = getLeft(i2,j2);
-    var right2 = getRight(i2,j2);
-    var top2 = getTop(i2,j2);
-    var bottom2 = getBottom(i2,j2);
-
-    if ((j2 == 0 && j1 == Size - 1 && i2 == i1) || (j2 == Size - 1 && j1 == 0 && i2 == i1) || (i2 == 0 && i1 == Size - 1 && j2 == j1)
-    || (i2 == Size - 1 && i1 == 0 && j2 == j1)) {
-        if (pbc || ApbcBothDirections || ApbcOneDirection || PlusMinus)
-        return (2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) +
-            2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) +
-            4.0*CouplingConstant + 2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][j2]));
-        else if (FreeBound)
-        return (2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) +
-            2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) +
-            2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][2]));
-    }
-    else if ((j2 == j1+1 && i2 == i1) || (j1 == j2 + 1 && i1 == i2) || (j2 == j1-1 && i2 == i1) ||
-    (j1 == j2 - 1 && i1 == i2) || (j2 == j1 && i2 == i1+1) || (j1 == j2 && i1 == i2 + 1) ||
-    (j2 == j1 && i2 == i1-1 || j1 == j2 && i1 == i2 - 1)) {
-        return (2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) +
-            2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) +
-            4.0*CouplingConstant + 2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][j2]));
-    } else {
-        return (2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) +
-            2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) +
-            2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][j2]));
-    }
-}
- 
- 
- 
-//energy change with local magnetic field
-function deltaUforKawasakiforMLocal(i1, j1, i2, j2){
-    var thisS = s[i1][j1];
-    var thatS = s[i2][j2];
-
-    var left1 = getLeft(i1,j1);
-    var right1 = getRight(i1,j1);
-    var top1 = getTop(i1,j1);
-    var bottom1 = getBottom(i1,j1);
-
-    var left2 = getLeft(i2,j2);
-    var right2 = getRight(i2,j2);
-    var top2 = getTop(i2,j2);
-    var bottom2 = getBottom(i2,j2);
-
-    if (((j2 == j1+1) && i2 == i1) || ((j1 == j2 + 1) && i1 == i2) || ((j2 == j1-1) && (i2 == i1))
-    || (j1 == j2 - 1 && i1 == i2) || (j2 == j1 && i2 == i1+1) || (j1 == j2 && i1 == i2 + 1) ||
-    (j2 == j1 && i2 == i1-1) || (j1 == j2 && i1 == i2 - 1)){
-        return 2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) + 2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) + 4.0*CouplingConstant + 2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][j2]);
-    } else {
-        return 2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) + 2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) + 2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][j2]);
-    }
-}
- 
-/* ------------------------ */
-/* KAWASAKI NON-LOCAL       */
-/* ------------------------ */
-//runs the kawasaki algorithm and colors squares accordingly
-function MetropolisforKawasaki(){
-    for(var step = 0; step <StepsPerLoop; step++){
-        var i1 = Math.floor(Math.random()*Size);
-        var j1 = Math.floor(Math.random()*Size);
-        var i2 = Math.floor(Math.random()*Size);
-        var j2 = Math.floor(Math.random()*Size);
-        if(s[i1][j1] != s[i2][j2]){
-            var thisS = s[i1][j1];
-            var thatS = s[i2][j2];
-            var EdiffforM = deltaUforKawasakiforM(i1, j1, i2, j2);
-            var Ediff = deltaUforKawasaki(i1, j1, i2, j2);
-            if(zeroT){ //to avoid dividing by zero
-                if((EdiffforM < 0.0) || ((EdiffforM == 0) && (Math.random() < .5))){ //always flip if deltaU is negative
-                    thisS *= -1;
-                    s[i1][j1] = thisS;
-                    thatS *= -1;
-                    s[i2][j2] = thatS;
-                    colorSquare(i1, j1);
-                    colorSquare(i2, j2);
-                    Ecurrent += Ediff;
-                    Mcurrent += ((2*thisS) + (2*thatS));
-                }
-
-            }
-            else if ((EdiffforM <= 0.0) || (Math.random() < Math.exp((-EdiffforM)/T))){
-                thisS *= -1;
-                s[i1][j1] = thisS;
-                thatS *= -1;
-                s[i2][j2] = thatS;
-                colorSquare(i1, j1);
-                colorSquare(i2, j2);
-                Ecurrent += Ediff;
-                Mcurrent += ((2*thisS) + (2*thatS));
-            }
-        }
-    }
-    InnerLoopCount++;
-}
-
-// energy change without local magnetic field
-function deltaU(i,j){
-    var left = getLeft(i,j);
-    var right = getRight(i,j);
-    var top = getTop(i,j);
-    var bottom = getBottom(i,j);
-    var thisS = s[i][j];
-    return (2.0 * CouplingConstant * thisS * (top+bottom+left+right)+2.0 * thisS * Bfield)
-}
- 
-//computes energy change if dipole s[i][j] is flipped with local magnetic field
-function deltaUforM(i, j){
-    var left = getLeft(i,j);
-    var right = getRight(i,j);
-    var top = getTop(i,j);
-    var bottom = getBottom(i,j);
-    var thisS = s[i][j];
-
-    return (2.0 * CouplingConstant * thisS * (top+bottom+left+right))+ (2.0 * thisS *(Bfield+BfieldM[i][j]));
-}
- 
-// energy change for kawaskai without local magnetic field
-function deltaUforKawasaki(i1,j1, i2, j2){
-    var thisS = s[i1][j1];
-    var thatS = s[i2][j2];
-
-    var left1 = getLeft(i1,j1);
-    var right1 = getRight(i1,j1);
-    var top1 = getTop(i1,j1);
-    var bottom1 = getBottom(i1,j1);
-
-    var left2 = getLeft(i2,j2);
-    var right2 = getRight(i2,j2);
-    var top2 = getTop(i2,j2);
-    var bottom2 = getBottom(i2,j2);
-
-    if ((j2 == 0 && j1 == Size - 1 && i2 == i1) || (j2 == Size - 1 && j1 == 0 && i2 == i1) || (i2 == 0 && i1 == Size - 1 && j2 == j1)
-    || (i2 == Size - 1 && i1 == 0 && j2 == j1)) {
-        if (pbc || ApbcBothDirections || ApbcOneDirection || PlusMinus)
-            return (2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) +
-                2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) +
-                4.0*CouplingConstant + 2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][j2]));
-        else if (FreeBound)
-            return (2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) +
-                2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) +
-                2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][2]));
-    }
-    else if ((j2 == j1+1 && i2 == i1) || (j1 == j2 + 1 && i1 == i2) || (j2 == j1-1 && i2 == i1) ||
-    (j1 == j2 - 1 && i1 == i2) || (j2 == j1 && i2 == i1+1) || (j1 == j2 && i1 == i2 + 1) ||
-    (j2 == j1 && i2 == i1-1 || j1 == j2 && i1 == i2 - 1))
-        return (2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) +
-            2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) +
-            4.0*CouplingConstant + 2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][j2]));
-    else
-        return (2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) +
-            2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) +
-            2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][j2]));
-}
- 
-//energy change with local magnetic field
-function deltaUforKawasakiforM(i1, j1, i2, j2){
-    var thisS = s[i1][j1];
-    var thatS = s[i2][j2];
-
-    var left1 = getLeft(i1,j1);
-    var right1 = getRight(i1,j1);
-    var top1 = getTop(i1,j1);
-    var bottom1 = getBottom(i1,j1);
-
-    var left2 = getLeft(i2,j2);
-    var right2 = getRight(i2,j2);
-    var top2 = getTop(i2,j2);
-    var bottom2 = getBottom(i2,j2);
-
-    if (((j2 == j1+1) && i2 == i1) || ((j1 == j2 + 1) && i1 == i2) || ((j2 == j1-1) && (i2 == i1))
-    || (j1 == j2 - 1 && i1 == i2) || (j2 == j1 && i2 == i1+1) || (j1 == j2 && i1 == i2 + 1) ||
-    (j2 == j1 && i2 == i1-1) || (j1 == j2 && i1 == i2 - 1)){
-        return 2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) + 2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) + 4.0*CouplingConstant + 2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][j2]);
-
-    } else {
-        return 2.0*CouplingConstant*thisS*(bottom1 + top1 + left1 + right1) + 2.0*CouplingConstant*thatS*(bottom2 + top2 + left2 + right2) + 2.0*thisS*(Bfield+BfieldM[i1][j1]) + 2.0*thatS*(Bfield+BfieldM[i2][j2]);
-    }
-}
-
 /* ---------------------------------- */
-/* HELPER FUNCTIONS FOR ENERGY CALCS  */
+/* DIPOLES FOR Metropolis & Kawasaki  */
 /* ---------------------------------- */
 //returns the dipole to the left of s[i][j] taking into account boundary conditions
 function getLeft(i, j){
@@ -559,6 +238,7 @@ function getBottom(i,j){
         return s[i+1][j];
 }
 
+
 /* ------------------------ */
 /* CUMULATE                 */
 /* ------------------------ */
@@ -605,7 +285,6 @@ function DisplayData(){
         document.getElementById(dataNames[i]).innerHTML = (data[i]/sizeSquared).toFixed(3);
     }
 }
-
 
 //computes total energy from scratch when using the metropolis algorithm
 function ComputeEforMetropolis(){
@@ -853,7 +532,6 @@ function MakeGrating(){
  
  
 function MakeDots(){
-
     for(var i = 0; i < Size; i++){
         for(var j = 0; j < Size; j++){
             s[i][j] = 1;
