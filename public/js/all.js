@@ -2,11 +2,11 @@
 // The specific calculations are contained in their respective algorithm JS file, e.g. metropolis.js
 // It also contains most event handlers for HTML inputs. These can probably be split out into a separate document.
 // patternSelect.js and graph.js have already been split out to simplify this file. 
-// This file is named 'all.js' because it used to contain everything until I began splitting them out. 
+// This file is named 'all.js' because it used to contain everything from IsingModelIndex.html until I began splitting them out. 
 
-/* -------------------------- */
-/* SET UP CALCULAIONS         */
-/* -------------------------- */
+/* ------------------------- */
+/* SETUP                     */
+/* ------------------------- */
 var running = false; // boolean closure for algorithms
 
 //sets local magnetic field of all dipoles to zero initially
@@ -39,10 +39,9 @@ for (var i = 0; i < Size; i++){
 changeMolRatioSettings();
 
 // actually start the simulation
-//computes current energy Ecurrent and Mcurrent of original lattice before simulation begins (resetData() then resets the averages, not current energy)
-ComputeE();
-resetData();
-simulate(); // begin simulation. uses the closure 'running' 
+ComputeE(); // computes current energy Ecurrent and Mcurrent of original lattice using active algorithm
+resetData(); // resets the average, but not current energy
+simulate(); // begin simulation
 
 
 /* ------------------------ */
@@ -148,7 +147,61 @@ function DisplayData(){
         document.getElementById(dataNames[i]).innerHTML = (data[i]/sizeSquared).toFixed(3);
     }
 }
+
+
+/* ------------------------ */
+/* COLOR CANVAS             */
+/* ------------------------ */
+// colors a certain square, taking into account if it has been set manually and if it's set to bipartite
+function colorSquare(i, j) {
+    if (!showSpin && BfieldM[i][j] == 100)// basically if the square is part of a nanotube it will be a darker blue
+        context.fillStyle = "#00008B";
+
+    else if (!showSpin && BfieldM[i][j] == -100)
+        context.fillStyle = "#FFD700"; //or a darker yellow
+
+    else if (showSpin && BfieldM[i][j] > .0001)
+        context.fillStyle = '#ff0000';
+
+    else if (showSpin && BfieldM[i][j] < -.0001)
+        context.fillStyle = '#008000';
+
+    else {
+        if ((magnetSelect.selectedIndex == 2) && (i%2 == j%2)){
+            if(s[i][j] == 1)
+                context.fillStyle = '#ffff00';
+            else
+                context.fillStyle = '#0000ff';
+        }
+        else {
+            if(s[i][j]== 1)
+                context.fillStyle = '#0000ff';
+            else
+                context.fillStyle = '#ffff00';
+        }
+    }
+    context.fillRect(j*SquareWidth, i*SquareWidth, SquareWidth,SquareWidth);
+}
  
+// Color all squares
+function colorAll(){
+    for(var i = 0; i < Size; i++) {
+        for(var j = 0; j < Size; j++){
+            colorSquare(i,j);
+        }
+    }
+}
+
+//recolors squares and resets Bfield (for use in the boundary conditions)
+function colorAllAndResetBfieldM(){ 
+    for(var i = 0; i < Size; i++) {
+        for(var j = 0; j < Size; j++){
+            BfieldM[i][j] = 0;
+            colorSquare(i,j);
+        }
+    }
+}
+
 /* ------------------------ */
 /* SPIN                     */
 /* ------------------------ */
@@ -214,58 +267,6 @@ function setSpin(i, j){
     BfieldM[i][j] = SettleB; //make sure local magnetic field is updated
     colorSquare(i,j);
 }
-
-/* ------------------------ */
-/* COLOR CANVAS             */
-/* ------------------------ */
-//colors a certain square, taking into account if it has been set manually and if it's set to bipartite
-function colorSquare(i, j) {
-    if(!showSpin && BfieldM[i][j] == 100)// basically if the square is part of a nanotube it will be a darker blue
-        context.fillStyle = "#00008B";
-    else if(!showSpin && BfieldM[i][j] == -100)
-        context.fillStyle = "#FFD700"; //or a darker yellow
-    else if(showSpin && BfieldM[i][j] > .0001)
-        context.fillStyle = '#ff0000';
-
-    else if (showSpin && BfieldM[i][j] < -.0001)
-        context.fillStyle = '#008000';
-
-    else{
-        if((magnetSelect.selectedIndex == 2) && (i%2 == j%2)){
-            if(s[i][j] == 1)
-                context.fillStyle = '#ffff00';
-            else
-                context.fillStyle = '#0000ff';
-        }
-        else{
-            if(s[i][j]== 1)
-                context.fillStyle = '#0000ff';
-            else
-                context.fillStyle = '#ffff00';
-        }
-    }
-    context.fillRect(j*SquareWidth, i*SquareWidth, SquareWidth,SquareWidth);
-}
- 
-// Color all squares
-function colorAll(){
-    for(var i = 0; i < Size; i++) {
-        for(var j = 0; j < Size; j++){
-            colorSquare(i,j);
-        }
-    }
-}
-
-//recolors squares and resets Bfield (for use in the boundary conditions)
-function colorAllAndResetBfieldM(){ 
-    for(var i = 0; i < Size; i++) {
-        for(var j = 0; j < Size; j++){
-            BfieldM[i][j] = 0;
-            colorSquare(i,j);
-        }
-    }
-}
-
 
 /* ---------------------- */
 /* EVENT HANDLERS         */
